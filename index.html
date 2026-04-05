@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>🥚 Egg Hunt Tracker</title>
+<title>🥚 Egg Hunt</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -17,918 +18,404 @@
     --parch-dark: #f0e4c0;
     --parch-darker: #e0d0a0;
     --ink: #3a2a1a;
-    --egg-yellow: #f5c842;
-    --egg-pink: #f084a0;
-    --egg-blue: #7ab8e8;
-    --egg-purple: #b07ad4;
     --found-green: #4caf50;
     --accent: #e8522a;
     --shadow: rgba(58,42,26,0.18);
+    --hunter-bg: #1a2e4a;
+    --hunter-card: #1e3a5f;
+    --hunter-accent: #f5c842;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-  body {
-    font-family: 'Nunito', sans-serif;
-    background: var(--grass);
-    min-height: 100vh;
-    color: var(--ink);
-    overflow-x: hidden;
-  }
-
-  /* Grass texture background */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      repeating-linear-gradient(
-        90deg,
-        transparent,
-        transparent 18px,
-        rgba(255,255,255,0.03) 18px,
-        rgba(255,255,255,0.03) 20px
-      ),
-      repeating-linear-gradient(
-        170deg,
-        transparent,
-        transparent 12px,
-        rgba(0,0,0,0.04) 12px,
-        rgba(0,0,0,0.04) 13px
-      );
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* ===== HEADER ===== */
-  .header {
-    background: var(--parch);
-    border-bottom: 3px solid var(--parch-darker);
-    padding: 14px 16px 12px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 3px 12px var(--shadow);
-  }
-
-  .header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-
-  .app-title {
-    font-family: 'Fredoka', sans-serif;
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--grass-dark);
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .app-title span.egg-icon {
-    font-size: 28px;
-    animation: wobble 3s ease-in-out infinite;
-  }
-
-  @keyframes wobble {
-    0%,100% { transform: rotate(-8deg); }
-    50% { transform: rotate(8deg); }
-  }
-
-  .stats-bar {
-    display: flex;
-    gap: 10px;
-  }
-
-  .stat-chip {
-    background: var(--grass);
-    color: white;
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-size: 13px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .stat-chip.found { background: var(--found-green); }
-  .stat-chip.total { background: var(--grass-dark); }
-  .stat-chip.money { background: var(--accent); }
-
-  /* ===== TABS ===== */
-  .tabs {
-    display: flex;
-    background: var(--parch-dark);
-    border-radius: 12px;
-    padding: 3px;
-    margin-top: 10px;
-  }
-
-  .tab-btn {
-    flex: 1;
-    padding: 8px 4px;
-    border: none;
-    background: transparent;
-    font-family: 'Fredoka', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--grass-dark);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-  }
-
-  .tab-btn.active {
-    background: var(--parch);
-    box-shadow: 0 2px 8px var(--shadow);
-    color: var(--grass-dark);
-  }
-
-  /* ===== MAIN CONTENT ===== */
-  .main {
-    position: relative;
-    z-index: 1;
-    padding: 0 0 120px;
-  }
-
-  .view { display: none; }
-  .view.active { display: block; }
-
-  /* ===== ADD EGG FORM ===== */
-  .add-panel {
-    background: var(--parch);
-    margin: 14px 12px;
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 4px 16px var(--shadow), 0 0 0 2px var(--parch-darker);
-  }
-
-  .panel-title {
-    font-family: 'Fredoka', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--grass-dark);
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .field-group {
-    margin-bottom: 14px;
-  }
-
-  .field-label {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--grass-dark);
-    margin-bottom: 6px;
-    display: block;
-  }
-
-  .field-input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 2px solid var(--parch-darker);
-    border-radius: 12px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 16px;
-    background: white;
-    color: var(--ink);
-    outline: none;
-    transition: border-color 0.2s;
-    -webkit-appearance: none;
-  }
-
-  .field-input:focus { border-color: var(--grass); }
-
-  .money-input-wrap {
-    position: relative;
-  }
-
-  .money-prefix {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--grass-dark);
-  }
-
-  .money-input-wrap .field-input { padding-left: 28px; }
-
-  /* GPS Button */
-  .gps-btn {
-    width: 100%;
-    padding: 13px;
-    background: var(--grass);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-family: 'Fredoka', sans-serif;
-    font-size: 17px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: background 0.2s, transform 0.1s;
-    -webkit-appearance: none;
-  }
-
-  .gps-btn:active { transform: scale(0.97); background: var(--grass-dark); }
-  .gps-btn.locked { background: var(--found-green); }
-  .gps-btn.loading { background: var(--grass-light); }
-
-  /* GPS coordinate display */
-  .coords-display {
-    background: #e8f5e9;
-    border: 2px solid #a5d6a7;
-    border-radius: 10px;
-    padding: 10px 14px;
-    margin-top: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #2e7d32;
-    display: none;
-    font-family: 'Courier New', monospace;
-  }
-
-  .coords-display.visible { display: block; }
-
-  /* Photo button */
-  .photo-row {
-    display: flex;
-    gap: 10px;
-    align-items: stretch;
-  }
-
-  .photo-btn-wrap {
-    flex: 1;
-  }
-
-  .photo-btn {
-    width: 100%;
-    height: 100%;
-    min-height: 52px;
-    padding: 10px;
-    background: var(--parch-dark);
-    border: 2px dashed var(--parch-darker);
-    border-radius: 12px;
-    font-family: 'Fredoka', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--grass-dark);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    transition: all 0.2s;
-    -webkit-appearance: none;
-  }
-
-  .photo-btn.has-photo {
-    border-style: solid;
-    border-color: var(--grass);
-    background: #e8f5e9;
-    color: var(--grass-dark);
-  }
-
-  .photo-preview-thumb {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 10px;
-    border: 2px solid var(--grass);
-    display: none;
-    flex-shrink: 0;
-  }
-
-  .photo-preview-thumb.visible { display: block; }
-
-  /* Color picker */
-  .color-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .color-swatch {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 3px solid transparent;
-    cursor: pointer;
-    transition: transform 0.15s, border-color 0.15s;
-    -webkit-appearance: none;
-  }
-
-  .color-swatch.selected {
-    border-color: var(--ink);
-    transform: scale(1.15);
-  }
-
-  /* Save button */
-  .save-btn {
-    width: 100%;
-    padding: 15px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 14px;
-    font-family: 'Fredoka', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s;
-    box-shadow: 0 4px 12px rgba(232,82,42,0.35);
-    -webkit-appearance: none;
-  }
-
-  .save-btn:active { transform: scale(0.97); }
-  .save-btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
-
-  /* ===== EGG LIST ===== */
-  .list-controls {
-    padding: 12px 12px 6px;
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .list-controls::-webkit-scrollbar { display: none; }
-
-  .filter-chip {
-    flex-shrink: 0;
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 2px solid var(--parch-darker);
-    background: var(--parch);
-    font-family: 'Fredoka', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--grass-dark);
-    cursor: pointer;
-    transition: all 0.15s;
-    -webkit-appearance: none;
-  }
-
-  .filter-chip.active {
-    background: var(--grass);
-    border-color: var(--grass);
-    color: white;
-  }
-
-  .egg-list {
-    padding: 6px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .egg-card {
-    background: var(--parch);
-    border-radius: 18px;
-    overflow: hidden;
-    box-shadow: 0 3px 10px var(--shadow);
-    border: 2px solid var(--parch-darker);
-    transition: transform 0.15s;
-    animation: slideIn 0.3s ease;
-  }
-
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .egg-card.is-found {
-    border-color: #a5d6a7;
-    background: #f1f8e9;
-  }
-
-  .egg-card-inner {
-    display: flex;
-    align-items: stretch;
-    gap: 0;
-  }
-
-  .egg-color-bar {
-    width: 6px;
-    flex-shrink: 0;
-    border-radius: 0;
-    min-height: 80px;
-  }
-
-  .egg-card-body {
-    flex: 1;
-    padding: 12px 14px;
-    min-width: 0;
-  }
-
-  .egg-card-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 8px;
-  }
-
-  .egg-name {
-    font-family: 'Fredoka', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--ink);
-    line-height: 1.2;
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .egg-money {
-    font-family: 'Fredoka', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--accent);
-    flex-shrink: 0;
-  }
-
-  .egg-coords {
-    font-size: 11px;
-    color: #888;
-    font-family: 'Courier New', monospace;
-    margin-top: 3px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .egg-note {
-    font-size: 13px;
-    color: #666;
-    margin-top: 4px;
-    line-height: 1.4;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-  }
-
-  .egg-card-actions {
-    display: flex;
-    gap: 6px;
-    margin-top: 10px;
-  }
-
-  .egg-action-btn {
-    flex: 1;
-    padding: 7px 8px;
-    border: none;
-    border-radius: 9px;
-    font-family: 'Fredoka', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    transition: opacity 0.15s;
-    -webkit-appearance: none;
-  }
-
-  .btn-found { background: var(--found-green); color: white; }
-  .btn-unfound { background: #ffa726; color: white; }
-  .btn-nav { background: var(--egg-blue); color: white; }
-  .btn-delete { background: #ef5350; color: white; }
-  .btn-photo-view { background: var(--grass-light); color: white; }
-
-  .egg-photo-thumb {
-    width: 68px;
-    flex-shrink: 0;
-    background: #ddd;
-  }
-
-  .egg-photo-thumb img {
-    width: 68px;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    min-height: 80px;
-  }
-
-  .found-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    background: var(--found-green);
-    color: white;
-    border-radius: 10px;
-    padding: 2px 8px;
-    font-size: 11px;
-    font-weight: 700;
-    margin-top: 4px;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: white;
-  }
-
-  .empty-icon {
-    font-size: 64px;
-    display: block;
-    margin-bottom: 12px;
-    animation: bounce 2s ease-in-out infinite;
-  }
-
-  @keyframes bounce {
-    0%,100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
-  }
-
-  .empty-title {
-    font-family: 'Fredoka', sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 6px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
-
-  .empty-sub {
-    font-size: 15px;
-    opacity: 0.85;
-  }
-
-  /* ===== MAP VIEW ===== */
-  .map-view-wrap {
-    padding: 12px;
-  }
-
-  .map-container {
-    background: var(--parch);
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 4px 16px var(--shadow);
-    border: 2px solid var(--parch-darker);
-  }
-
-  .map-header {
-    padding: 14px 16px 10px;
-    background: var(--parch);
-    border-bottom: 2px solid var(--parch-darker);
-  }
-
-  .map-title {
-    font-family: 'Fredoka', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--grass-dark);
-    margin-bottom: 4px;
-  }
-
-  .map-sub {
-    font-size: 12px;
-    color: #888;
-  }
-
-  #map-frame {
-    width: 100%;
-    height: 420px;
-    border: none;
-    display: block;
-  }
-
-  .map-legend {
-    padding: 12px 16px;
-    background: var(--parch);
-    border-top: 2px solid var(--parch-darker);
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--ink);
-  }
-
-  .legend-dot {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .map-egg-list {
-    padding: 0 12px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 12px;
-  }
-
-  .map-egg-row {
-    background: var(--parch);
-    border-radius: 14px;
-    padding: 11px 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 2px 8px var(--shadow);
-    border: 2px solid var(--parch-darker);
-  }
-
-  .map-egg-dot {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    border: 2px solid rgba(0,0,0,0.15);
-  }
-
-  .map-egg-info { flex: 1; min-width: 0; }
-  .map-egg-name { font-family: 'Fredoka', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); }
-  .map-egg-coord { font-size: 11px; color: #999; font-family: monospace; }
-
-  .map-nav-btn {
-    background: var(--grass);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 8px 12px;
-    font-family: 'Fredoka', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    -webkit-appearance: none;
-  }
-
-  /* ===== MODAL ===== */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 1000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-
-  .modal-overlay.open { display: flex; }
-
-  .modal-box {
-    background: var(--parch);
-    border-radius: 20px;
-    padding: 20px;
-    max-width: 400px;
-    width: 100%;
-    max-height: 85vh;
-    overflow-y: auto;
-  }
-
-  .modal-box img {
-    width: 100%;
-    border-radius: 12px;
-    margin-bottom: 12px;
-  }
-
-  .modal-title {
-    font-family: 'Fredoka', sans-serif;
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--grass-dark);
-    margin-bottom: 8px;
-  }
-
-  .modal-detail {
-    font-size: 14px;
-    color: #555;
-    margin-bottom: 6px;
-    display: flex;
-    gap: 6px;
-    align-items: flex-start;
-  }
-
-  .modal-close {
-    width: 100%;
-    margin-top: 14px;
-    padding: 13px;
-    background: var(--grass);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-family: 'Fredoka', sans-serif;
-    font-size: 17px;
-    font-weight: 600;
-    cursor: pointer;
-    -webkit-appearance: none;
-  }
-
-  /* ===== TOAST ===== */
-  .toast {
-    position: fixed;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--ink);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 30px;
-    font-family: 'Fredoka', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    z-index: 2000;
-    opacity: 0;
-    transition: all 0.3s;
-    white-space: nowrap;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-  }
-
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  .sync-dot {
-    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
-    background: #4caf50;
-    box-shadow: 0 0 0 2px rgba(76,175,80,0.3);
-    animation: pulse-green 2s infinite;
-  }
-  .sync-dot.syncing { background: #ffa726; box-shadow: 0 0 0 2px rgba(255,167,38,0.3); animation: pulse-orange 1s infinite; }
-  .sync-dot.error { background: #ef5350; animation: none; }
+  body { font-family: 'Nunito', sans-serif; background: var(--grass); min-height: 100vh; color: var(--ink); overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image: repeating-linear-gradient(90deg,transparent,transparent 18px,rgba(255,255,255,0.03) 18px,rgba(255,255,255,0.03) 20px), repeating-linear-gradient(170deg,transparent,transparent 12px,rgba(0,0,0,0.04) 12px,rgba(0,0,0,0.04) 13px); pointer-events:none; z-index:0; }
+
+  /* ===== SPLASH ===== */
+  .splash { position:fixed; inset:0; z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center; background: linear-gradient(160deg, #2a5a2a 0%, #3d7a3d 50%, #1a3a1a 100%); padding:30px; }
+  .splash-egg { font-size:80px; animation: wobble 2s ease-in-out infinite; margin-bottom:16px; }
+  @keyframes wobble { 0%,100%{transform:rotate(-8deg) scale(1)} 50%{transform:rotate(8deg) scale(1.05)} }
+  .splash-title { font-family:'Fredoka',sans-serif; font-size:36px; font-weight:700; color:white; text-align:center; margin-bottom:6px; text-shadow:0 2px 8px rgba(0,0,0,0.3); }
+  .splash-sub { font-size:16px; color:rgba(255,255,255,0.75); margin-bottom:48px; text-align:center; }
+  .splash-btns { display:flex; flex-direction:column; gap:14px; width:100%; max-width:320px; }
+  .splash-btn { padding:18px; border:none; border-radius:18px; font-family:'Fredoka',sans-serif; font-size:22px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition:transform 0.15s, box-shadow 0.15s; -webkit-appearance:none; }
+  .splash-btn:active { transform:scale(0.96); }
+  .splash-btn.hider { background:var(--parch); color:var(--grass-dark); box-shadow:0 6px 20px rgba(0,0,0,0.25); }
+  .splash-btn.hunter { background:var(--hunter-bg); color:var(--hunter-accent); box-shadow:0 6px 20px rgba(0,0,0,0.35); border:2px solid var(--hunter-accent); }
+  .splash.hidden { display:none; }
+
+  /* ===== PIN SCREEN ===== */
+  .pin-screen { position:fixed; inset:0; z-index:999; display:flex; flex-direction:column; align-items:center; justify-content:center; background:linear-gradient(160deg,#2a5a2a,#3d7a3d); padding:30px; }
+  .pin-screen.hidden { display:none; }
+  .pin-title { font-family:'Fredoka',sans-serif; font-size:28px; font-weight:700; color:white; margin-bottom:8px; }
+  .pin-sub { font-size:15px; color:rgba(255,255,255,0.7); margin-bottom:32px; }
+  .pin-dots { display:flex; gap:14px; margin-bottom:32px; }
+  .pin-dot { width:18px; height:18px; border-radius:50%; border:2.5px solid rgba(255,255,255,0.6); background:transparent; transition:background 0.15s; }
+  .pin-dot.filled { background:white; border-color:white; }
+  .pin-pad { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; width:100%; max-width:280px; }
+  .pin-key { padding:18px; border:none; border-radius:14px; background:rgba(255,255,255,0.15); color:white; font-family:'Fredoka',sans-serif; font-size:24px; font-weight:600; cursor:pointer; -webkit-appearance:none; transition:background 0.1s; }
+  .pin-key:active { background:rgba(255,255,255,0.35); }
+  .pin-key.del { font-size:18px; }
+  .pin-error { color:#ff7070; font-size:14px; font-weight:700; margin-top:16px; min-height:20px; }
+  .pin-back { margin-top:20px; background:transparent; border:none; color:rgba(255,255,255,0.6); font-family:'Nunito',sans-serif; font-size:15px; cursor:pointer; text-decoration:underline; }
+
+  /* ===== ADMIN HEADER ===== */
+  .header { background:var(--parch); border-bottom:3px solid var(--parch-darker); padding:14px 16px 12px; position:sticky; top:0; z-index:100; box-shadow:0 3px 12px var(--shadow); }
+  .header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .app-title { font-family:'Fredoka',sans-serif; font-size:24px; font-weight:700; color:var(--grass-dark); display:flex; align-items:center; gap:6px; }
+  .app-title span.egg-icon { font-size:26px; animation:wobble 3s ease-in-out infinite; }
+  .stat-chip { background:var(--grass); color:white; border-radius:20px; padding:4px 10px; font-size:12px; font-weight:700; display:flex; align-items:center; gap:4px; }
+  .stat-chip.found { background:var(--found-green); }
+  .stat-chip.total { background:var(--grass-dark); }
+  .stat-chip.money { background:var(--accent); }
+  .sync-dot { width:9px; height:9px; border-radius:50%; background:#4caf50; box-shadow:0 0 0 2px rgba(76,175,80,0.3); animation:pulse-green 2s infinite; }
+  .sync-dot.syncing { background:#ffa726; animation:pulse-orange 1s infinite; }
+  .sync-dot.error { background:#ef5350; animation:none; }
   @keyframes pulse-green { 0%,100%{box-shadow:0 0 0 2px rgba(76,175,80,0.3)} 50%{box-shadow:0 0 0 5px rgba(76,175,80,0.1)} }
   @keyframes pulse-orange { 0%,100%{box-shadow:0 0 0 2px rgba(255,167,38,0.3)} 50%{box-shadow:0 0 0 5px rgba(255,167,38,0.1)} }
+  .sync-label { font-size:11px; font-weight:700; color:#888; display:flex; align-items:center; gap:4px; }
+  .logout-btn { background:transparent; border:none; font-size:12px; color:#999; cursor:pointer; font-family:'Nunito',sans-serif; text-decoration:underline; }
+  .tabs { display:flex; background:var(--parch-dark); border-radius:12px; padding:3px; margin-top:10px; }
+  .tab-btn { flex:1; padding:8px 4px; border:none; background:transparent; font-family:'Fredoka',sans-serif; font-size:15px; font-weight:600; color:var(--grass-dark); border-radius:10px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:4px; }
+  .tab-btn.active { background:var(--parch); box-shadow:0 2px 8px var(--shadow); }
 
-  .sync-label {
-    font-size: 11px; font-weight: 700; color: #888; display: flex; align-items: center; gap: 4px;
-  }
+  /* ===== MAIN ===== */
+  .main { position:relative; z-index:1; padding:0 0 120px; }
+  .view { display:none; }
+  .view.active { display:block; }
 
-  /* Hidden file input */
-  #camera-input { display: none; }
+  /* ===== ADD EGG FORM ===== */
+  .add-panel { background:var(--parch); margin:14px 12px; border-radius:20px; padding:20px; box-shadow:0 4px 16px var(--shadow), 0 0 0 2px var(--parch-darker); }
+  .panel-title { font-family:'Fredoka',sans-serif; font-size:20px; font-weight:700; color:var(--grass-dark); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+  .field-group { margin-bottom:14px; }
+  .field-label { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--grass-dark); margin-bottom:6px; display:block; }
+  .field-input { width:100%; padding:12px 14px; border:2px solid var(--parch-darker); border-radius:12px; font-family:'Nunito',sans-serif; font-size:16px; background:white; color:var(--ink); outline:none; transition:border-color 0.2s; -webkit-appearance:none; }
+  .field-input:focus { border-color:var(--grass); }
+  .money-input-wrap { position:relative; }
+  .money-prefix { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:18px; font-weight:700; color:var(--grass-dark); }
+  .money-input-wrap .field-input { padding-left:28px; }
+  .gps-btn { width:100%; padding:13px; background:var(--grass); color:white; border:none; border-radius:12px; font-family:'Fredoka',sans-serif; font-size:17px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background 0.2s,transform 0.1s; -webkit-appearance:none; }
+  .gps-btn:active { transform:scale(0.97); background:var(--grass-dark); }
+  .gps-btn.locked { background:var(--found-green); }
+  .gps-btn.loading { background:var(--grass-light); }
+  .coords-display { background:#e8f5e9; border:2px solid #a5d6a7; border-radius:10px; padding:10px 14px; margin-top:8px; font-size:13px; font-weight:600; color:#2e7d32; display:none; font-family:'Courier New',monospace; }
+  .coords-display.visible { display:block; }
+  .photo-row { display:flex; gap:10px; align-items:stretch; }
+  .photo-btn-wrap { flex:1; }
+  .photo-btn { width:100%; height:100%; min-height:52px; padding:10px; background:var(--parch-dark); border:2px dashed var(--parch-darker); border-radius:12px; font-family:'Fredoka',sans-serif; font-size:15px; font-weight:600; color:var(--grass-dark); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.2s; -webkit-appearance:none; }
+  .photo-btn.has-photo { border-style:solid; border-color:var(--grass); background:#e8f5e9; }
+  .photo-preview-thumb { width:60px; height:60px; object-fit:cover; border-radius:10px; border:2px solid var(--grass); display:none; flex-shrink:0; }
+  .photo-preview-thumb.visible { display:block; }
+  .color-row { display:flex; gap:8px; flex-wrap:wrap; }
+  .color-swatch { width:36px; height:36px; border-radius:50%; border:3px solid transparent; cursor:pointer; transition:transform 0.15s,border-color 0.15s; -webkit-appearance:none; }
+  .color-swatch.selected { border-color:var(--ink); transform:scale(1.15); }
+  .save-btn { width:100%; padding:15px; background:var(--accent); color:white; border:none; border-radius:14px; font-family:'Fredoka',sans-serif; font-size:20px; font-weight:700; cursor:pointer; margin-top:6px; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s; box-shadow:0 4px 12px rgba(232,82,42,0.35); -webkit-appearance:none; }
+  .save-btn:active { transform:scale(0.97); }
+  #camera-input { display:none; }
+
+  /* ===== LIST ===== */
+  .list-controls { padding:12px 12px 6px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
+  .list-controls::-webkit-scrollbar { display:none; }
+  .filter-chip { flex-shrink:0; padding:6px 14px; border-radius:20px; border:2px solid var(--parch-darker); background:var(--parch); font-family:'Fredoka',sans-serif; font-size:14px; font-weight:600; color:var(--grass-dark); cursor:pointer; transition:all 0.15s; -webkit-appearance:none; }
+  .filter-chip.active { background:var(--grass); border-color:var(--grass); color:white; }
+  .egg-list { padding:6px 12px; display:flex; flex-direction:column; gap:10px; }
+  .egg-card { background:var(--parch); border-radius:18px; overflow:hidden; box-shadow:0 3px 10px var(--shadow); border:2px solid var(--parch-darker); animation:slideIn 0.3s ease; }
+  .egg-card.is-found { border-color:#a5d6a7; background:#f1f8e9; }
+  @keyframes slideIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .egg-card-inner { display:flex; align-items:stretch; }
+  .egg-color-bar { width:6px; flex-shrink:0; min-height:80px; }
+  .egg-card-body { flex:1; padding:12px 14px; min-width:0; }
+  .egg-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+  .egg-name { font-family:'Fredoka',sans-serif; font-size:18px; font-weight:700; color:var(--ink); }
+  .egg-money { font-family:'Fredoka',sans-serif; font-size:18px; font-weight:700; color:var(--accent); flex-shrink:0; }
+  .egg-coords { font-size:11px; color:#888; font-family:'Courier New',monospace; margin-top:3px; }
+  .egg-note { font-size:13px; color:#666; margin-top:4px; line-height:1.4; }
+  .found-badge { display:inline-flex; align-items:center; gap:3px; background:var(--found-green); color:white; border-radius:10px; padding:2px 8px; font-size:11px; font-weight:700; margin-top:4px; }
+  .egg-card-actions { display:flex; gap:6px; margin-top:10px; }
+  .egg-action-btn { flex:1; padding:7px 8px; border:none; border-radius:9px; font-family:'Fredoka',sans-serif; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:4px; -webkit-appearance:none; }
+  .btn-found { background:var(--found-green); color:white; }
+  .btn-unfound { background:#ffa726; color:white; }
+  .btn-nav { background:#7ab8e8; color:white; }
+  .btn-delete { background:#ef5350; color:white; }
+  .btn-photo-view { background:var(--grass-light); color:white; }
+  .egg-photo-thumb { width:68px; flex-shrink:0; }
+  .egg-photo-thumb img { width:68px; height:100%; object-fit:cover; display:block; min-height:80px; cursor:pointer; }
+  .empty-state { text-align:center; padding:60px 20px; color:white; }
+  .empty-icon { font-size:64px; display:block; margin-bottom:12px; animation:bounce 2s ease-in-out infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  .empty-title { font-family:'Fredoka',sans-serif; font-size:24px; font-weight:700; margin-bottom:6px; text-shadow:0 2px 4px rgba(0,0,0,0.2); }
+  .empty-sub { font-size:15px; opacity:0.85; }
+
+  /* ===== MAP (ADMIN) ===== */
+  .map-view-wrap { padding:12px; }
+  .map-container { background:var(--parch); border-radius:20px; overflow:hidden; box-shadow:0 4px 16px var(--shadow); border:2px solid var(--parch-darker); }
+  .map-header { padding:14px 16px 10px; background:var(--parch); border-bottom:2px solid var(--parch-darker); }
+  .map-title { font-family:'Fredoka',sans-serif; font-size:18px; font-weight:700; color:var(--grass-dark); margin-bottom:4px; }
+  .map-sub { font-size:12px; color:#888; }
+  #map-frame { width:100%; height:420px; border:none; display:block; }
+  .map-legend { padding:12px 16px; background:var(--parch); border-top:2px solid var(--parch-darker); display:flex; gap:16px; flex-wrap:wrap; }
+  .legend-item { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--ink); }
+  .legend-dot { width:14px; height:14px; border-radius:50%; flex-shrink:0; }
+  .map-egg-list { padding:0 12px 12px; display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+  .map-egg-row { background:var(--parch); border-radius:14px; padding:11px 14px; display:flex; align-items:center; gap:10px; box-shadow:0 2px 8px var(--shadow); border:2px solid var(--parch-darker); }
+  .map-egg-dot { width:18px; height:18px; border-radius:50%; flex-shrink:0; border:2px solid rgba(0,0,0,0.15); }
+  .map-egg-info { flex:1; min-width:0; }
+  .map-egg-name { font-family:'Fredoka',sans-serif; font-size:16px; font-weight:700; color:var(--ink); }
+  .map-egg-coord { font-size:11px; color:#999; font-family:monospace; }
+  .map-nav-btn { background:var(--grass); color:white; border:none; border-radius:10px; padding:8px 12px; font-family:'Fredoka',sans-serif; font-size:14px; font-weight:600; cursor:pointer; -webkit-appearance:none; }
+
+  /* ===== PHOTO MODAL ===== */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:2000; display:none; align-items:center; justify-content:center; padding:20px; }
+  .modal-overlay.open { display:flex; }
+  .modal-box { background:var(--parch); border-radius:20px; padding:20px; max-width:400px; width:100%; max-height:85vh; overflow-y:auto; position:relative; }
+  .modal-box img { width:100%; border-radius:12px; margin-bottom:12px; }
+  .modal-title { font-family:'Fredoka',sans-serif; font-size:22px; font-weight:700; color:var(--grass-dark); margin-bottom:8px; }
+  .modal-detail { font-size:14px; color:#555; margin-bottom:6px; }
+  .modal-close { width:100%; margin-top:14px; padding:13px; background:var(--grass); color:white; border:none; border-radius:12px; font-family:'Fredoka',sans-serif; font-size:17px; font-weight:600; cursor:pointer; -webkit-appearance:none; display:block; }
+
+  /* ===== TOAST ===== */
+  .toast { position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:white; padding:12px 20px; border-radius:30px; font-family:'Fredoka',sans-serif; font-size:16px; font-weight:600; z-index:3000; opacity:0; transition:all 0.3s; white-space:nowrap; box-shadow:0 4px 16px rgba(0,0,0,0.3); }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ===== HUNTER VIEW ===== */
+  .hunter-wrap { min-height:100vh; background:var(--hunter-bg); display:flex; flex-direction:column; }
+  .hunter-header { background:#132038; padding:14px 16px 12px; position:sticky; top:0; z-index:100; box-shadow:0 3px 12px rgba(0,0,0,0.4); }
+  .hunter-header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .hunter-title { font-family:'Fredoka',sans-serif; font-size:24px; font-weight:700; color:var(--hunter-accent); display:flex; align-items:center; gap:8px; }
+  .hunter-stats { display:flex; gap:8px; align-items:center; }
+  .hunter-chip { background:rgba(255,255,255,0.1); color:white; border-radius:20px; padding:4px 12px; font-size:13px; font-weight:700; }
+  .hunter-chip.found-chip { background:var(--found-green); }
+  .hunter-tabs { display:flex; background:rgba(255,255,255,0.08); border-radius:12px; padding:3px; }
+  .hunter-tab { flex:1; padding:8px 4px; border:none; background:transparent; font-family:'Fredoka',sans-serif; font-size:15px; font-weight:600; color:rgba(255,255,255,0.6); border-radius:10px; cursor:pointer; transition:all 0.2s; -webkit-appearance:none; }
+  .hunter-tab.active { background:var(--hunter-accent); color:var(--hunter-bg); }
+  .hunter-view { display:none; }
+  .hunter-view.active { display:block; }
+
+  /* Hunter Map */
+  .hunter-map-wrap { padding:12px; }
+  .hunter-map-box { border-radius:20px; overflow:hidden; border:2px solid rgba(255,255,255,0.1); box-shadow:0 4px 20px rgba(0,0,0,0.4); }
+  #hunter-map-frame { width:100%; height:480px; border:none; display:block; }
+  .hunter-legend { background:#132038; padding:12px 16px; display:flex; gap:16px; flex-wrap:wrap; }
+  .hunter-legend-item { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:rgba(255,255,255,0.8); }
+
+  /* Hunter List */
+  .hunter-list { padding:10px 12px; display:flex; flex-direction:column; gap:10px; }
+  .hunter-egg-card { background:#132038; border-radius:18px; overflow:hidden; border:2px solid rgba(255,255,255,0.08); box-shadow:0 3px 12px rgba(0,0,0,0.3); animation:slideIn 0.3s ease; }
+  .hunter-egg-card.is-found { border-color:rgba(76,175,80,0.4); background:#0d2b0d; }
+  .hunter-egg-inner { display:flex; align-items:stretch; }
+  .hunter-color-bar { width:6px; flex-shrink:0; min-height:80px; }
+  .hunter-egg-body { flex:1; padding:14px 16px; }
+  .hunter-egg-top { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
+  .hunter-egg-label { font-family:'Fredoka',sans-serif; font-size:20px; font-weight:700; color:white; }
+  .hunter-found-badge { display:inline-flex; align-items:center; gap:4px; background:var(--found-green); color:white; border-radius:10px; padding:3px 10px; font-size:12px; font-weight:700; }
+  .hunter-egg-actions { display:flex; gap:8px; }
+  .hunter-found-btn { flex:1; padding:12px; border:none; border-radius:12px; font-family:'Fredoka',sans-serif; font-size:17px; font-weight:700; cursor:pointer; -webkit-appearance:none; transition:transform 0.1s; }
+  .hunter-found-btn:active { transform:scale(0.96); }
+  .hunter-found-btn.not-found { background:var(--hunter-accent); color:var(--hunter-bg); }
+  .hunter-found-btn.already-found { background:rgba(76,175,80,0.2); color:#81c784; border:2px solid rgba(76,175,80,0.3); }
+  .hunter-nav-btn { padding:12px 16px; background:rgba(255,255,255,0.1); color:white; border:none; border-radius:12px; font-family:'Fredoka',sans-serif; font-size:15px; font-weight:600; cursor:pointer; -webkit-appearance:none; }
+  .hunter-empty { text-align:center; padding:60px 20px; color:rgba(255,255,255,0.5); }
+  .hunter-empty-icon { font-size:56px; display:block; margin-bottom:12px; }
+  .hunter-empty-title { font-family:'Fredoka',sans-serif; font-size:22px; font-weight:700; margin-bottom:6px; }
+
+  /* Hunter filter chips */
+  .hunter-controls { padding:10px 12px 4px; display:flex; gap:8px; }
+  .hunter-filter { flex-shrink:0; padding:6px 14px; border-radius:20px; border:2px solid rgba(255,255,255,0.15); background:transparent; font-family:'Fredoka',sans-serif; font-size:14px; font-weight:600; color:rgba(255,255,255,0.7); cursor:pointer; -webkit-appearance:none; }
+  .hunter-filter.active { background:var(--hunter-accent); border-color:var(--hunter-accent); color:var(--hunter-bg); }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-    <div class="header-top">
-    <div class="app-title">
-      <span class="egg-icon">🥚</span>
-      Egg Hunt Tracker
-    </div>
-    <div style="display:flex;gap:6px;align-items:center;">
-      <div class="sync-label"><div class="sync-dot" id="sync-dot"></div> Live</div>
-      <div class="stat-chip total" id="stat-total">🥚 0</div>
-      <div class="stat-chip found" id="stat-found">✓ 0</div>
-      <div class="stat-chip money" id="stat-money">$0</div>
-    </div>
-  </div>
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('add')">➕ Hide Egg</button>
-    <button class="tab-btn" onclick="switchTab('list')">📋 List</button>
-    <button class="tab-btn" onclick="switchTab('map')">🗺️ Map</button>
+<!-- ===== SPLASH ===== -->
+<div class="splash" id="splash">
+  <div class="splash-egg">🥚</div>
+  <div class="splash-title">Easter Egg Hunt</div>
+  <div class="splash-sub">Who are you today?</div>
+  <div class="splash-btns">
+    <button class="splash-btn hider" onclick="goHider()">🧺 Egg Hider</button>
+    <button class="splash-btn hunter" onclick="goHunter()">🏃 Egg Hunter</button>
   </div>
 </div>
 
-<div class="main">
+<!-- ===== PIN SCREEN ===== -->
+<div class="pin-screen hidden" id="pin-screen">
+  <div class="pin-title">🔐 Egg Hider PIN</div>
+  <div class="pin-sub">Enter your secret PIN to continue</div>
+  <div class="pin-dots" id="pin-dots">
+    <div class="pin-dot" id="pd0"></div>
+    <div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div>
+    <div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-pad">
+    <button class="pin-key" onclick="pinKey('1')">1</button>
+    <button class="pin-key" onclick="pinKey('2')">2</button>
+    <button class="pin-key" onclick="pinKey('3')">3</button>
+    <button class="pin-key" onclick="pinKey('4')">4</button>
+    <button class="pin-key" onclick="pinKey('5')">5</button>
+    <button class="pin-key" onclick="pinKey('6')">6</button>
+    <button class="pin-key" onclick="pinKey('7')">7</button>
+    <button class="pin-key" onclick="pinKey('8')">8</button>
+    <button class="pin-key" onclick="pinKey('9')">9</button>
+    <button class="pin-key" onclick="pinKey('0')">0</button>
+    <button class="pin-key del" onclick="pinDel()">⌫</button>
+  </div>
+  <div class="pin-error" id="pin-error"></div>
+  <button class="pin-back" onclick="goSplash()">← Back</button>
+</div>
 
-  <!-- ADD EGG VIEW -->
-  <div class="view active" id="view-add">
-    <div class="add-panel">
-      <div class="panel-title">🐣 Hide a New Egg</div>
-
-      <div class="field-group">
-        <label class="field-label">Egg Name / Label</label>
-        <input type="text" class="field-input" id="egg-name" placeholder="e.g. Big Oak, Red Barn, Gate Post…" autocomplete="off">
+<!-- ===== ADMIN VIEW ===== -->
+<div id="admin-wrap" style="display:none;">
+  <div class="header">
+    <div class="header-top">
+      <div class="app-title"><span class="egg-icon">🥚</span> Egg Hider</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <div style="display:flex;align-items:center;gap:4px;"><div class="sync-dot" id="sync-dot"></div><span class="sync-label" style="font-size:10px;color:#999;">Live</span></div>
+        <div class="stat-chip total" id="stat-total">🥚 0</div>
+        <div class="stat-chip found" id="stat-found">✓ 0</div>
+        <div class="stat-chip money" id="stat-money">$0</div>
+        <button class="logout-btn" onclick="goSplash()">Exit</button>
       </div>
-
-      <div class="field-group">
-        <label class="field-label">💰 Money Amount</label>
-        <div class="money-input-wrap">
-          <span class="money-prefix">$</span>
-          <input type="number" class="field-input" id="egg-money" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
-        </div>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">📍 GPS Location</label>
-        <button class="gps-btn" id="gps-btn" onclick="lockLocation()">
-          <span id="gps-btn-icon">📡</span>
-          <span id="gps-btn-text">Lock My Location</span>
-        </button>
-        <div class="coords-display" id="coords-display"></div>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">🌈 Egg Color</label>
-        <div class="color-row" id="color-row">
-          <button class="color-swatch selected" data-color="#f5c842" style="background:#f5c842" onclick="selectColor(this)"></button>
-          <button class="color-swatch" data-color="#f084a0" style="background:#f084a0" onclick="selectColor(this)"></button>
-          <button class="color-swatch" data-color="#7ab8e8" style="background:#7ab8e8" onclick="selectColor(this)"></button>
-          <button class="color-swatch" data-color="#b07ad4" style="background:#b07ad4" onclick="selectColor(this)"></button>
-          <button class="color-swatch" data-color="#5aa55a" style="background:#5aa55a" onclick="selectColor(this)"></button>
-          <button class="color-swatch" data-color="#ff7043" style="background:#ff7043" onclick="selectColor(this)"></button>
-          <button class="color-swatch" data-color="#c8a97e" style="background:#c8a97e" onclick="selectColor(this)"></button>
-          <button class="color-swatch" data-color="#ffffff" style="background:#fff;border:3px solid #ccc" onclick="selectColor(this)"></button>
-        </div>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">📸 Photo (Optional)</label>
-        <div class="photo-row">
-          <div class="photo-btn-wrap">
-            <button class="photo-btn" id="photo-btn" onclick="document.getElementById('camera-input').click()">
-              <span>📷</span> <span id="photo-btn-text">Take Photo</span>
-            </button>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('add')">➕ Hide Egg</button>
+      <button class="tab-btn" onclick="switchTab('list')">📋 List</button>
+      <button class="tab-btn" onclick="switchTab('map')">🗺️ Map</button>
+    </div>
+  </div>
+  <div class="main">
+    <!-- HIDE EGG -->
+    <div class="view active" id="view-add">
+      <div class="add-panel">
+        <div class="panel-title">🐣 Hide a New Egg</div>
+        <div class="field-group">
+          <label class="field-label">💰 Money Amount</label>
+          <div class="money-input-wrap">
+            <span class="money-prefix">$</span>
+            <input type="number" class="field-input" id="egg-money" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
           </div>
-          <img class="photo-preview-thumb" id="photo-thumb" src="" alt="Preview">
         </div>
-        <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handlePhoto(this)">
+        <div class="field-group">
+          <label class="field-label">📍 GPS Location</label>
+          <button class="gps-btn" id="gps-btn" onclick="lockLocation()">
+            <span id="gps-btn-icon">📡</span><span id="gps-btn-text">Lock My Location</span>
+          </button>
+          <div class="coords-display" id="coords-display"></div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">🌈 Egg Color</label>
+          <div class="color-row" id="color-row">
+            <button class="color-swatch selected" data-color="#f5c842" style="background:#f5c842" onclick="selectColor(this)"></button>
+            <button class="color-swatch" data-color="#f084a0" style="background:#f084a0" onclick="selectColor(this)"></button>
+            <button class="color-swatch" data-color="#7ab8e8" style="background:#7ab8e8" onclick="selectColor(this)"></button>
+            <button class="color-swatch" data-color="#b07ad4" style="background:#b07ad4" onclick="selectColor(this)"></button>
+            <button class="color-swatch" data-color="#5aa55a" style="background:#5aa55a" onclick="selectColor(this)"></button>
+            <button class="color-swatch" data-color="#ff7043" style="background:#ff7043" onclick="selectColor(this)"></button>
+            <button class="color-swatch" data-color="#c8a97e" style="background:#c8a97e" onclick="selectColor(this)"></button>
+            <button class="color-swatch" data-color="#ffffff" style="background:#fff;border:3px solid #ccc" onclick="selectColor(this)"></button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">📸 Photo (Optional)</label>
+          <div class="photo-row">
+            <div class="photo-btn-wrap">
+              <button class="photo-btn" id="photo-btn" onclick="document.getElementById('camera-input').click()">
+                <span>📷</span><span id="photo-btn-text">Take Photo</span>
+              </button>
+            </div>
+            <img class="photo-preview-thumb" id="photo-thumb" src="" alt="Preview">
+          </div>
+          <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handlePhoto(this)">
+        </div>
+        <div class="field-group">
+          <label class="field-label">📝 Notes (Optional)</label>
+          <input type="text" class="field-input" id="egg-note" placeholder="e.g. Under the big rock…" autocomplete="off">
+        </div>
+        <button class="save-btn" onclick="saveEgg()">🥚 Save Egg Location</button>
       </div>
+    </div>
 
-      <div class="field-group">
-        <label class="field-label">📝 Notes (Optional)</label>
-        <input type="text" class="field-input" id="egg-note" placeholder="e.g. Under the big rock, behind the fence…" autocomplete="off">
+    <!-- LIST -->
+    <div class="view" id="view-list">
+      <div class="list-controls">
+        <button class="filter-chip active" data-filter="all" onclick="setFilter(this)">All Eggs</button>
+        <button class="filter-chip" data-filter="hidden" onclick="setFilter(this)">🥚 Hidden</button>
+        <button class="filter-chip" data-filter="found" onclick="setFilter(this)">✅ Found</button>
       </div>
+      <div class="egg-list" id="egg-list"></div>
+    </div>
 
-      <button class="save-btn" id="save-btn" onclick="saveEgg()">
-        🥚 Save Egg Location
-      </button>
+    <!-- MAP -->
+    <div class="view" id="view-map">
+      <div class="map-view-wrap">
+        <div class="map-container">
+          <div class="map-header">
+            <div class="map-title">🗺️ Egg Hunt Map</div>
+            <div class="map-sub" id="map-sub">Tap an egg below to navigate</div>
+          </div>
+          <iframe id="map-frame" src="about:blank"></iframe>
+          <div class="map-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#f5c842;border:2px solid #888;"></div>Hidden</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#4caf50;border:2px solid #2e7d32;"></div>Found</div>
+          </div>
+        </div>
+      </div>
+      <div class="map-egg-list" id="map-egg-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HUNTER VIEW ===== -->
+<div id="hunter-wrap" class="hunter-wrap" style="display:none;">
+  <div class="hunter-header">
+    <div class="hunter-header-top">
+      <div class="hunter-title">🏃 Egg Hunt!</div>
+      <div class="hunter-stats">
+        <div class="hunter-chip" id="h-stat-total">🥚 0</div>
+        <div class="hunter-chip found-chip" id="h-stat-found">✅ 0</div>
+        <button class="logout-btn" style="color:rgba(255,255,255,0.4);" onclick="goSplash()">Exit</button>
+      </div>
+    </div>
+    <div class="hunter-tabs">
+      <button class="hunter-tab active" onclick="switchHunterTab('map')">🗺️ Map</button>
+      <button class="hunter-tab" onclick="switchHunterTab('list')">📋 Eggs</button>
     </div>
   </div>
 
-  <!-- LIST VIEW -->
-  <div class="view" id="view-list">
-    <div class="list-controls">
-      <button class="filter-chip active" data-filter="all" onclick="setFilter(this)">All Eggs</button>
-      <button class="filter-chip" data-filter="hidden" onclick="setFilter(this)">🥚 Hidden</button>
-      <button class="filter-chip" data-filter="found" onclick="setFilter(this)">✅ Found</button>
-    </div>
-    <div class="egg-list" id="egg-list"></div>
-  </div>
-
-  <!-- MAP VIEW -->
-  <div class="view" id="view-map">
-    <div class="map-view-wrap">
-      <div class="map-container">
-        <div class="map-header">
-          <div class="map-title">🗺️ Egg Hunt Map</div>
-          <div class="map-sub" id="map-sub">Tap an egg below to navigate to it</div>
-        </div>
-        <iframe id="map-frame" src="about:blank"></iframe>
-        <div class="map-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:#f5c842;border:2px solid #888;"></div> Hidden</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#4caf50;border:2px solid #2e7d32;"></div> Found</div>
+  <!-- HUNTER MAP TAB -->
+  <div class="hunter-view active" id="hview-map">
+    <div class="hunter-map-wrap">
+      <div class="hunter-map-box">
+        <iframe id="hunter-map-frame" src="about:blank"></iframe>
+        <div class="hunter-legend">
+          <div class="hunter-legend-item"><div class="legend-dot" style="background:#f5c842;border:2px solid #888;"></div>Not Found</div>
+          <div class="hunter-legend-item"><div class="legend-dot" style="background:#4caf50;border:2px solid #2e7d32;"></div>Found!</div>
         </div>
       </div>
     </div>
-    <div class="map-egg-list" id="map-egg-list"></div>
   </div>
 
+  <!-- HUNTER LIST TAB -->
+  <div class="hunter-view" id="hview-list">
+    <div class="hunter-controls">
+      <button class="hunter-filter active" data-filter="all" onclick="setHunterFilter(this)">All</button>
+      <button class="hunter-filter" data-filter="hidden" onclick="setHunterFilter(this)">🥚 Not Found</button>
+      <button class="hunter-filter" data-filter="found" onclick="setHunterFilter(this)">✅ Found</button>
+    </div>
+    <div class="hunter-list" id="hunter-list"></div>
+  </div>
 </div>
 
 <!-- PHOTO MODAL -->
-<div class="modal-overlay" id="photo-modal" onclick="closeModal()">
-  <div class="modal-box" onclick="event.stopPropagation()">
+<div class="modal-overlay" id="photo-modal">
+  <div class="modal-box">
     <img id="modal-photo" src="" alt="Egg photo">
     <div class="modal-title" id="modal-name"></div>
     <div class="modal-detail" id="modal-coords"></div>
     <div class="modal-detail" id="modal-note"></div>
     <div class="modal-detail" id="modal-money"></div>
-    <button class="modal-close" onclick="closeModal()">Close</button>
+    <button class="modal-close" id="modal-close-btn">Close</button>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -947,66 +434,127 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
 const EGG_DOC = doc(db, 'hunts', 'main');
+const ADMIN_PIN = '2025';
 
 // ===== STATE =====
 let eggs = [];
-let currentLat = null;
-let currentLng = null;
-let currentAccuracy = null;
+let currentMode = null; // 'admin' | 'hunter'
+let currentLat = null, currentLng = null, currentAccuracy = null;
 let currentPhoto = null;
 let selectedColor = '#f5c842';
 let currentFilter = 'all';
+let hunterFilter = 'all';
 let lastSavedJSON = '';
+let eggCounter = 0;
 
-// ===== FIREBASE LOAD & REAL-TIME SYNC =====
+// ===== PIN STATE =====
+let pinEntry = '';
+
+// ===== SPLASH =====
+function goSplash() {
+  document.getElementById('splash').classList.remove('hidden');
+  document.getElementById('pin-screen').classList.add('hidden');
+  document.getElementById('admin-wrap').style.display = 'none';
+  document.getElementById('hunter-wrap').style.display = 'none';
+  currentMode = null;
+  pinEntry = '';
+  updatePinDots();
+}
+
+function goHider() {
+  document.getElementById('splash').classList.add('hidden');
+  document.getElementById('pin-screen').classList.remove('hidden');
+  pinEntry = '';
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+}
+
+function goHunter() {
+  document.getElementById('splash').classList.add('hidden');
+  currentMode = 'hunter';
+  document.getElementById('hunter-wrap').style.display = 'flex';
+  renderHunterMap();
+  renderHunterList();
+}
+
+// ===== PIN =====
+function pinKey(digit) {
+  if (pinEntry.length >= 4) return;
+  pinEntry += digit;
+  updatePinDots();
+  if (pinEntry.length === 4) {
+    setTimeout(checkPin, 150);
+  }
+}
+
+function pinDel() {
+  pinEntry = pinEntry.slice(0, -1);
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('pd' + i).className = 'pin-dot' + (i < pinEntry.length ? ' filled' : '');
+  }
+}
+
+function checkPin() {
+  if (pinEntry === ADMIN_PIN) {
+    document.getElementById('pin-screen').classList.add('hidden');
+    document.getElementById('admin-wrap').style.display = 'block';
+    currentMode = 'admin';
+    renderAll();
+  } else {
+    document.getElementById('pin-error').textContent = '❌ Wrong PIN, try again';
+    pinEntry = '';
+    updatePinDots();
+  }
+}
+
+// ===== FIREBASE =====
 function startSync() {
   updateSyncDot('syncing');
   onSnapshot(EGG_DOC, (snapshot) => {
     if (snapshot.exists()) {
       const rawEggs = snapshot.data().eggs || [];
+      eggCounter = snapshot.data().counter || rawEggs.length;
       const incoming = mergePhotos(rawEggs);
       const incomingJSON = JSON.stringify(rawEggs);
       if (incomingJSON !== lastSavedJSON) {
         const wasEmpty = eggs.length === 0;
         eggs = incoming;
         lastSavedJSON = incomingJSON;
-        renderAll();
-        if (!wasEmpty) showToast('🔄 Egg list updated!');
+        if (currentMode === 'admin') renderAll();
+        if (currentMode === 'hunter') { renderHunterList(); renderHunterMap(); }
+        if (!wasEmpty) showToast('🔄 Eggs updated!');
       }
     } else {
       eggs = [];
-      renderAll();
+      if (currentMode === 'admin') renderAll();
+      if (currentMode === 'hunter') { renderHunterList(); renderHunterMap(); }
     }
     updateSyncDot('ok');
   }, (err) => {
-    console.error('Sync error:', err);
     updateSyncDot('error');
-    showToast('⚠️ Connection issue. Check your internet.');
+    showToast('⚠️ Connection issue.');
   });
-}
-
-async function loadEggs() {
-  // Initial load handled by onSnapshot above
-  startSync();
 }
 
 async function saveEggs() {
   try {
     updateSyncDot('syncing');
-    // Save photos locally only (too large for Firestore 1MB limit)
     const photoMap = {};
     eggs.forEach(e => { if (e.photo) photoMap[e.id] = e.photo; });
     try { localStorage.setItem('egg-photos', JSON.stringify(photoMap)); } catch(le) {}
-    // Strip photos before sending to Firebase
     const eggsNoPhotos = eggs.map(({photo, ...rest}) => rest);
     const json = JSON.stringify(eggsNoPhotos);
-    await setDoc(EGG_DOC, { eggs: eggsNoPhotos, updatedAt: new Date().toISOString() });
+    await setDoc(EGG_DOC, { eggs: eggsNoPhotos, counter: eggCounter, updatedAt: new Date().toISOString() });
     lastSavedJSON = json;
     updateSyncDot('ok');
   } catch (e) {
-    console.error('Save failed:', e);
     updateSyncDot('error');
-    showToast('\u26a0\ufe0f Could not save. Check connection.');
+    showToast('⚠️ Could not save.');
   }
 }
 
@@ -1019,21 +567,18 @@ function mergePhotos(incomingEggs) {
 
 function updateSyncDot(status) {
   const dot = document.getElementById('sync-dot');
-  if (!dot) return;
-  dot.className = 'sync-dot ' + status;
+  if (dot) dot.className = 'sync-dot ' + status;
 }
 
-// ===== TABS =====
+// ===== ADMIN TABS =====
 function switchTab(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
   document.querySelectorAll('.tab-btn').forEach(b => {
-    if (b.textContent.includes(name === 'add' ? 'Hide' : name === 'list' ? 'List' : 'Map')) {
-      b.classList.add('active');
-    }
+    if (b.textContent.includes(name === 'add' ? 'Hide' : name === 'list' ? 'List' : 'Map')) b.classList.add('active');
   });
-  if (name === 'map') renderMap();
+  if (name === 'map') renderAdminMap();
   if (name === 'list') renderList();
 }
 
@@ -1043,31 +588,17 @@ function lockLocation() {
   const icon = document.getElementById('gps-btn-icon');
   const text = document.getElementById('gps-btn-text');
   const display = document.getElementById('coords-display');
-
-  btn.classList.add('loading');
-  icon.textContent = '⏳';
-  text.textContent = 'Getting GPS…';
-
+  btn.classList.add('loading'); icon.textContent = '⏳'; text.textContent = 'Getting GPS…';
   navigator.geolocation.getCurrentPosition(
     (pos) => {
-      currentLat = pos.coords.latitude;
-      currentLng = pos.coords.longitude;
-      currentAccuracy = Math.round(pos.coords.accuracy);
-      btn.classList.remove('loading');
-      btn.classList.add('locked');
-      icon.textContent = '✅';
-      text.textContent = 'Location Locked!';
+      currentLat = pos.coords.latitude; currentLng = pos.coords.longitude; currentAccuracy = Math.round(pos.coords.accuracy);
+      btn.classList.remove('loading'); btn.classList.add('locked');
+      icon.textContent = '✅'; text.textContent = 'Location Locked!';
       display.textContent = `📍 ${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}  ±${currentAccuracy}m`;
       display.classList.add('visible');
       showToast('📍 Location locked!');
     },
-    (err) => {
-      btn.classList.remove('loading');
-      icon.textContent = '⚠️';
-      text.textContent = 'GPS Failed – Tap to Retry';
-      showToast('⚠️ Could not get GPS. Check permissions.');
-      console.error(err);
-    },
+    (err) => { btn.classList.remove('loading'); icon.textContent = '⚠️'; text.textContent = 'GPS Failed – Tap to Retry'; showToast('⚠️ GPS failed. Check permissions.'); },
     { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
   );
 }
@@ -1078,16 +609,13 @@ function handlePhoto(input) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
-    // Compress image to max 800px wide, 0.7 quality JPEG
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
       const maxW = 800;
       const scale = Math.min(1, maxW / img.width);
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.width = img.width * scale; canvas.height = img.height * scale;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
       currentPhoto = canvas.toDataURL('image/jpeg', 0.7);
       document.getElementById('photo-thumb').src = currentPhoto;
       document.getElementById('photo-thumb').classList.add('visible');
@@ -1109,36 +637,28 @@ function selectColor(el) {
 
 // ===== SAVE EGG =====
 function saveEgg() {
-  const name = document.getElementById('egg-name').value.trim();
   const money = parseFloat(document.getElementById('egg-money').value) || 0;
   const note = document.getElementById('egg-note').value.trim();
-
-  if (!name) { showToast('⚠️ Please give this egg a name!'); return; }
   if (!currentLat) { showToast('⚠️ Please lock your GPS location first!'); return; }
-
+  eggCounter++;
   const egg = {
     id: Date.now().toString(),
-    name,
-    money,
-    note,
-    lat: currentLat,
-    lng: currentLng,
-    accuracy: currentAccuracy,
+    num: eggCounter,
+    money, note,
+    lat: currentLat, lng: currentLng, accuracy: currentAccuracy,
     color: selectedColor,
     photo: currentPhoto,
     found: false,
     createdAt: new Date().toISOString()
   };
-
   eggs.push(egg);
   saveEggs();
   renderAll();
   resetForm();
-  showToast(`🥚 "${name}" hidden! $${money.toFixed(2)} inside.`);
+  showToast(`🥚 Egg #${eggCounter} hidden! $${money.toFixed(2)} inside.`);
 }
 
 function resetForm() {
-  document.getElementById('egg-name').value = '';
   document.getElementById('egg-money').value = '';
   document.getElementById('egg-note').value = '';
   document.getElementById('coords-display').classList.remove('visible');
@@ -1159,40 +679,24 @@ function resetForm() {
 // ===== MARK FOUND / UNFOUND =====
 function markFound(id) {
   const egg = eggs.find(e => e.id === id);
-  if (egg) {
-    egg.found = true;
-    egg.foundAt = new Date().toISOString();
-    saveEggs();
-    renderAll();
-    showToast(`🎉 "${egg.name}" found! $${egg.money.toFixed(2)} collected!`);
-  }
+  if (egg) { egg.found = true; egg.foundAt = new Date().toISOString(); saveEggs(); renderAll(); showToast(`🎉 Egg #${egg.num} found! $${egg.money.toFixed(2)} collected!`); }
 }
-
 function markUnfound(id) {
   const egg = eggs.find(e => e.id === id);
-  if (egg) {
-    egg.found = false;
-    egg.foundAt = null;
-    saveEggs();
-    renderAll();
-    showToast(`🥚 "${egg.name}" marked as hidden again.`);
-  }
+  if (egg) { egg.found = false; egg.foundAt = null; saveEggs(); renderAll(); showToast(`🥚 Egg #${egg.num} marked hidden again.`); }
 }
-
 function deleteEgg(id) {
   const egg = eggs.find(e => e.id === id);
   if (!egg) return;
-  if (!confirm(`Delete "${egg.name}"? This cannot be undone.`)) return;
+  if (!confirm(`Delete Egg #${egg.num}? This cannot be undone.`)) return;
   eggs = eggs.filter(e => e.id !== id);
-  saveEggs();
-  renderAll();
-  showToast(`🗑️ "${egg.name}" deleted.`);
+  saveEggs(); renderAll();
+  showToast(`🗑️ Egg #${egg.num} deleted.`);
 }
 
 // ===== NAVIGATE =====
-function navigateTo(lat, lng, name) {
-  const url = `https://maps.apple.com/?daddr=${lat},${lng}&dirflg=w&t=m`;
-  window.open(url, '_blank');
+function navigateTo(lat, lng) {
+  window.open(`https://maps.apple.com/?daddr=${lat},${lng}&dirflg=w&t=m`, '_blank');
 }
 
 // ===== FILTER =====
@@ -1203,19 +707,17 @@ function setFilter(el) {
   renderList();
 }
 
-// ===== RENDER =====
+// ===== ADMIN RENDER =====
 function renderAll() {
-  updateStats();
-  renderList();
+  updateStats(); renderList();
 }
 
 function updateStats() {
-  const total = eggs.length;
-  const found = eggs.filter(e => e.found).length;
-  const totalMoney = eggs.reduce((s, e) => s + (e.money || 0), 0);
+  const total = eggs.length, found = eggs.filter(e => e.found).length;
+  const money = eggs.reduce((s, e) => s + (e.money || 0), 0);
   document.getElementById('stat-total').textContent = `🥚 ${total}`;
   document.getElementById('stat-found').textContent = `✓ ${found}`;
-  document.getElementById('stat-money').textContent = `$${totalMoney.toFixed(2)}`;
+  document.getElementById('stat-money').textContent = `$${money.toFixed(2)}`;
 }
 
 function renderList() {
@@ -1223,116 +725,67 @@ function renderList() {
   let filtered = eggs;
   if (currentFilter === 'hidden') filtered = eggs.filter(e => !e.found);
   if (currentFilter === 'found') filtered = eggs.filter(e => e.found);
-
   if (filtered.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <span class="empty-icon">🌿</span>
-        <div class="empty-title">${currentFilter === 'found' ? 'No eggs found yet!' : currentFilter === 'hidden' ? 'No hidden eggs!' : 'No eggs hidden yet!'}</div>
-        <div class="empty-sub">${currentFilter === 'all' ? 'Go hide some eggs using the Hide Egg tab!' : 'Change the filter above.'}</div>
-      </div>`;
+    container.innerHTML = `<div class="empty-state"><span class="empty-icon">🌿</span><div class="empty-title">${currentFilter === 'found' ? 'No eggs found yet!' : 'No eggs here!'}</div><div class="empty-sub">${currentFilter === 'all' ? 'Go hide some eggs!' : 'Change the filter above.'}</div></div>`;
     return;
   }
-
   container.innerHTML = filtered.map(egg => `
-    <div class="egg-card ${egg.found ? 'is-found' : ''}" id="card-${egg.id}">
+    <div class="egg-card ${egg.found ? 'is-found' : ''}">
       <div class="egg-card-inner">
         <div class="egg-color-bar" style="background:${egg.color}"></div>
         <div class="egg-card-body">
           <div class="egg-card-top">
-            <div class="egg-name">${escHtml(egg.name)}</div>
+            <div class="egg-name">Egg #${egg.num || '?'}</div>
             ${egg.money > 0 ? `<div class="egg-money">$${egg.money.toFixed(2)}</div>` : ''}
           </div>
           ${egg.lat ? `<div class="egg-coords">📍 ${egg.lat.toFixed(5)}, ${egg.lng.toFixed(5)}${egg.accuracy ? ` ±${egg.accuracy}m` : ''}</div>` : ''}
           ${egg.note ? `<div class="egg-note">📝 ${escHtml(egg.note)}</div>` : ''}
-          ${egg.found ? `<div class="found-badge">✅ Found${egg.foundAt ? ' ' + formatTime(egg.foundAt) : ''}</div>` : ''}
+          ${egg.found ? `<div class="found-badge">✅ Found ${egg.foundAt ? formatTime(egg.foundAt) : ''}</div>` : ''}
           <div class="egg-card-actions">
-            ${!egg.found
-              ? `<button class="egg-action-btn btn-found" onclick="markFound('${egg.id}')">✅ Found!</button>`
-              : `<button class="egg-action-btn btn-unfound" onclick="markUnfound('${egg.id}')">↩️ Rehide</button>`
-            }
-            ${egg.lat ? `<button class="egg-action-btn btn-nav" onclick="navigateTo(${egg.lat},${egg.lng},'${escHtml(egg.name)}')">🧭 Nav</button>` : ''}
+            ${!egg.found ? `<button class="egg-action-btn btn-found" onclick="markFound('${egg.id}')">✅ Found!</button>` : `<button class="egg-action-btn btn-unfound" onclick="markUnfound('${egg.id}')">↩️ Rehide</button>`}
+            ${egg.lat ? `<button class="egg-action-btn btn-nav" onclick="navigateTo(${egg.lat},${egg.lng})">🧭 Nav</button>` : ''}
             ${egg.photo ? `<button class="egg-action-btn btn-photo-view" onclick="showPhoto('${egg.id}')">📷</button>` : ''}
             <button class="egg-action-btn btn-delete" onclick="deleteEgg('${egg.id}')">🗑️</button>
           </div>
         </div>
-        ${egg.photo ? `<div class="egg-photo-thumb"><img src="${egg.photo}" alt="egg photo" onclick="showPhoto('${egg.id}')"></div>` : ''}
+        ${egg.photo ? `<div class="egg-photo-thumb"><img src="${egg.photo}" alt="photo" onclick="showPhoto('${egg.id}')"></div>` : ''}
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-function renderMap() {
-  const container = document.getElementById('map-egg-list');
-  const frame = document.getElementById('map-frame');
-  const sub = document.getElementById('map-sub');
-
-  const geoEggs = eggs.filter(e => e.lat);
-  sub.textContent = geoEggs.length > 0
-    ? `${geoEggs.length} egg${geoEggs.length !== 1 ? 's' : ''} with GPS — tap Nav to get directions`
-    : 'Hide eggs with GPS to see them here';
-
-  if (geoEggs.length === 0) {
-    frame.src = 'about:blank';
-    container.innerHTML = `<div class="empty-state"><span class="empty-icon">🗺️</span><div class="empty-title">No GPS eggs yet</div><div class="empty-sub">Lock GPS when hiding eggs to see them on the map.</div></div>`;
-    return;
-  }
-
-  // Build satellite map with markers - offset stacked eggs so all are visible
+function buildMapHTML(geoEggs, isAdmin) {
   const coordCount = {};
   const markersJS = geoEggs.map(egg => {
     const color = egg.found ? '#4caf50' : (egg.color || '#f5c842');
-    const label = escHtml(egg.name);
-    const money = egg.money > 0 ? `$${egg.money.toFixed(2)}` : '';
     const key = egg.lat.toFixed(4) + ',' + egg.lng.toFixed(4);
     coordCount[key] = (coordCount[key] || 0) + 1;
     const n = coordCount[key];
-    // Spiral offset so stacked eggs spread out slightly
     const angle = (n - 1) * 2.4;
     const radius = n === 1 ? 0 : 0.00008 * Math.ceil((n-1)/6);
     const lat = egg.lat + radius * Math.cos(angle);
     const lng = egg.lng + radius * Math.sin(angle);
-    return `
-      var marker${egg.id.slice(-6)} = L.circleMarker([${lat}, ${lng}], {
-        radius: 12, fillColor: "${color}", color: "#fff", weight: 2.5, opacity: 1, fillOpacity: 0.95
-      }).addTo(map);
-      marker${egg.id.slice(-6)}.bindPopup('<b>${label}</b>${money ? '<br>' + money : ''}${egg.note ? '<br><small>' + escHtml(egg.note) + '</small>' : ''}');
-    `;
+    const label = isAdmin ? `Egg #${egg.num || '?'}${egg.money > 0 ? ' — $' + egg.money.toFixed(2) : ''}${egg.note ? '<br><small>' + escHtml(egg.note) + '</small>' : ''}` : `Egg #${egg.num || '?'}`;
+    return `var m${egg.id.slice(-6)}=L.circleMarker([${lat},${lng}],{radius:12,fillColor:"${color}",color:"#fff",weight:2.5,opacity:1,fillOpacity:0.95}).addTo(map);m${egg.id.slice(-6)}.bindPopup('<b>${label}</b>');`;
   }).join('\n');
-
   const avgLat = geoEggs.reduce((s, e) => s + e.lat, 0) / geoEggs.length;
   const avgLng = geoEggs.reduce((s, e) => s + e.lng, 0) / geoEggs.length;
+  return `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script><style>body,html{margin:0;padding:0;}#map{width:100%;height:100vh;}</style></head><body><div id="map"></div><script>var map=L.map('map',{zoomControl:true}).setView([${avgLat},${avgLng}],17);L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri',maxZoom:19}).addTo(map);${markersJS}var g=L.featureGroup([${geoEggs.map(e=>`L.circleMarker([${e.lat},${e.lng}],{radius:1})`).join(',')}]);map.fitBounds(g.getBounds().pad(0.2));<\/script></body></html>`;
+}
 
-  const mapHTML = `<!DOCTYPE html><html><head>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
-    <style>body,html{margin:0;padding:0;} #map{width:100%;height:100vh;}</style>
-  </head><body>
-    <div id="map"></div>
-    <script>
-      var map = L.map('map', {zoomControl: true}).setView([${avgLat}, ${avgLng}], 17);
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: '© Esri — Esri, DigitalGlobe, GeoEye, Earthstar Geographics', maxZoom: 19
-      }).addTo(map);
-      ${markersJS}
-      var group = L.featureGroup([${geoEggs.map(e => `L.circleMarker([${e.lat},${e.lng}],{radius:1})`).join(',')}]);
-      map.fitBounds(group.getBounds().pad(0.2));
-    <\/script>
-  </body></html>`;
-
-  frame.srcdoc = mapHTML;
-
-  container.innerHTML = geoEggs.map(egg => `
+function renderAdminMap() {
+  const geoEggs = eggs.filter(e => e.lat);
+  document.getElementById('map-sub').textContent = geoEggs.length > 0 ? `${geoEggs.length} eggs on map` : 'No GPS eggs yet';
+  if (geoEggs.length === 0) { document.getElementById('map-frame').src = 'about:blank'; document.getElementById('map-egg-list').innerHTML = ''; return; }
+  document.getElementById('map-frame').srcdoc = buildMapHTML(geoEggs, true);
+  document.getElementById('map-egg-list').innerHTML = geoEggs.map(egg => `
     <div class="map-egg-row">
       <div class="map-egg-dot" style="background:${egg.found ? '#4caf50' : egg.color}"></div>
       <div class="map-egg-info">
-        <div class="map-egg-name">${escHtml(egg.name)}${egg.money > 0 ? ` — $${egg.money.toFixed(2)}` : ''}</div>
+        <div class="map-egg-name">Egg #${egg.num || '?'}${egg.money > 0 ? ` — $${egg.money.toFixed(2)}` : ''}</div>
         <div class="map-egg-coord">${egg.lat.toFixed(5)}, ${egg.lng.toFixed(5)}</div>
       </div>
-      <button class="map-nav-btn" onclick="navigateTo(${egg.lat},${egg.lng},'${escHtml(egg.name)}')">🧭 Nav</button>
-    </div>
-  `).join('');
+      <button class="map-nav-btn" onclick="navigateTo(${egg.lat},${egg.lng})">🧭 Nav</button>
+    </div>`).join('');
 }
 
 // ===== PHOTO MODAL =====
@@ -1340,7 +793,7 @@ function showPhoto(id) {
   const egg = eggs.find(e => e.id === id);
   if (!egg || !egg.photo) return;
   document.getElementById('modal-photo').src = egg.photo;
-  document.getElementById('modal-name').textContent = '🥚 ' + egg.name;
+  document.getElementById('modal-name').textContent = `🥚 Egg #${egg.num || '?'}`;
   document.getElementById('modal-coords').textContent = egg.lat ? `📍 ${egg.lat.toFixed(6)}, ${egg.lng.toFixed(6)}` : '';
   document.getElementById('modal-note').textContent = egg.note ? `📝 ${egg.note}` : '';
   document.getElementById('modal-money').textContent = egg.money > 0 ? `💰 $${egg.money.toFixed(2)} inside` : '';
@@ -1351,42 +804,107 @@ function closeModal() {
   document.getElementById('photo-modal').classList.remove('open');
 }
 
+// Close button event listener (fixes the broken close button issue)
+document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+
+// ===== HUNTER VIEW =====
+function switchHunterTab(name) {
+  document.querySelectorAll('.hunter-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.hunter-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('hview-' + name).classList.add('active');
+  document.querySelectorAll('.hunter-tab').forEach(b => {
+    if (b.textContent.includes(name === 'map' ? 'Map' : 'Eggs')) b.classList.add('active');
+  });
+  if (name === 'map') renderHunterMap();
+  if (name === 'list') renderHunterList();
+}
+
+function setHunterFilter(el) {
+  document.querySelectorAll('.hunter-filter').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  hunterFilter = el.dataset.filter;
+  renderHunterList();
+}
+
+function renderHunterList() {
+  const container = document.getElementById('hunter-list');
+  let filtered = eggs;
+  if (hunterFilter === 'hidden') filtered = eggs.filter(e => !e.found);
+  if (hunterFilter === 'found') filtered = eggs.filter(e => e.found);
+  // Update hunter stats
+  const total = eggs.length, found = eggs.filter(e => e.found).length;
+  document.getElementById('h-stat-total').textContent = `🥚 ${total}`;
+  document.getElementById('h-stat-found').textContent = `✅ ${found}`;
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="hunter-empty"><span class="hunter-empty-icon">${hunterFilter === 'found' ? '🎉' : '🌿'}</span><div class="hunter-empty-title">${hunterFilter === 'found' ? 'None found yet — keep hunting!' : 'All eggs found!'}</div></div>`;
+    return;
+  }
+  container.innerHTML = filtered.map(egg => `
+    <div class="hunter-egg-card ${egg.found ? 'is-found' : ''}">
+      <div class="hunter-egg-inner">
+        <div class="hunter-color-bar" style="background:${egg.color}"></div>
+        <div class="hunter-egg-body">
+          <div class="hunter-egg-top">
+            <div class="hunter-egg-label">🥚 Egg #${egg.num || '?'}</div>
+            ${egg.found ? `<div class="hunter-found-badge">✅ Found!</div>` : ''}
+          </div>
+          <div class="hunter-egg-actions">
+            ${!egg.found
+              ? `<button class="hunter-found-btn not-found" onclick="hunterMarkFound('${egg.id}')">🎉 I Found It!</button>`
+              : `<button class="hunter-found-btn already-found" onclick="hunterMarkUnfound('${egg.id}')">↩️ Mark Not Found</button>`
+            }
+            ${egg.lat ? `<button class="hunter-nav-btn" onclick="navigateTo(${egg.lat},${egg.lng})">🧭</button>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function renderHunterMap() {
+  const geoEggs = eggs.filter(e => e.lat);
+  const total = eggs.length, found = eggs.filter(e => e.found).length;
+  document.getElementById('h-stat-total').textContent = `🥚 ${total}`;
+  document.getElementById('h-stat-found').textContent = `✅ ${found}`;
+  if (geoEggs.length === 0) { document.getElementById('hunter-map-frame').src = 'about:blank'; return; }
+  document.getElementById('hunter-map-frame').srcdoc = buildMapHTML(geoEggs, false);
+}
+
+function hunterMarkFound(id) {
+  const egg = eggs.find(e => e.id === id);
+  if (egg) { egg.found = true; egg.foundAt = new Date().toISOString(); saveEggs(); renderHunterList(); renderHunterMap(); showToast(`🎉 Egg #${egg.num} found!`); }
+}
+
+function hunterMarkUnfound(id) {
+  const egg = eggs.find(e => e.id === id);
+  if (egg) { egg.found = false; egg.foundAt = null; saveEggs(); renderHunterList(); renderHunterMap(); showToast(`↩️ Egg #${egg.num} unmarked.`); }
+}
+
 // ===== TOAST =====
 let toastTimer;
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  t.textContent = msg; t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
 // ===== HELPERS =====
-function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
+function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function formatTime(iso) { const d = new Date(iso); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }
 
-function formatTime(iso) {
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-}
-
-// ===== EXPOSE TO GLOBAL SCOPE (needed for inline onclick with type=module) =====
-window.switchTab = switchTab;
-window.lockLocation = lockLocation;
-window.handlePhoto = handlePhoto;
-window.selectColor = selectColor;
-window.saveEgg = saveEgg;
-window.markFound = markFound;
-window.markUnfound = markUnfound;
-window.deleteEgg = deleteEgg;
-window.navigateTo = navigateTo;
-window.setFilter = setFilter;
-window.showPhoto = showPhoto;
-window.closeModal = closeModal;
+// ===== EXPOSE GLOBALS =====
+window.goHider = goHider; window.goHunter = goHunter; window.goSplash = goSplash;
+window.pinKey = pinKey; window.pinDel = pinDel;
+window.switchTab = switchTab; window.lockLocation = lockLocation;
+window.handlePhoto = handlePhoto; window.selectColor = selectColor;
+window.saveEgg = saveEgg; window.markFound = markFound; window.markUnfound = markUnfound;
+window.deleteEgg = deleteEgg; window.navigateTo = navigateTo; window.setFilter = setFilter;
+window.showPhoto = showPhoto; window.closeModal = closeModal;
+window.switchHunterTab = switchHunterTab; window.setHunterFilter = setHunterFilter;
+window.hunterMarkFound = hunterMarkFound; window.hunterMarkUnfound = hunterMarkUnfound;
 
 // ===== INIT =====
-loadEggs();
+startSync();
 </script>
 </body>
 </html>
