@@ -5,240 +5,519 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>🥚 Egg Hunt</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --grass: #3d7a3d;
-    --grass-light: #5aa55a;
-    --grass-dark: #2a5a2a;
-    --parch: #fdf6e3;
-    --parch-dark: #f0e4c0;
-    --parch-darker: #e0d0a0;
-    --ink: #3a2a1a;
-    --found-green: #4caf50;
-    --accent: #e8522a;
-    --shadow: rgba(58,42,26,0.18);
-    --hunter-bg: #1a2e4a;
-    --hunter-card: #1e3a5f;
-    --hunter-accent: #f5c842;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { font-family: 'Nunito', sans-serif; background: var(--grass); min-height: 100vh; color: var(--ink); overflow-x: hidden; }
-  body::before { content:''; position:fixed; inset:0; background-image: repeating-linear-gradient(90deg,transparent,transparent 18px,rgba(255,255,255,0.03) 18px,rgba(255,255,255,0.03) 20px), repeating-linear-gradient(170deg,transparent,transparent 12px,rgba(0,0,0,0.04) 12px,rgba(0,0,0,0.04) 13px); pointer-events:none; z-index:0; }
+:root {
+  --black: #0a0a0a;
+  --dark: #111111;
+  --card: #181818;
+  --border: #2a2a2a;
+  --lime: #c8f135;
+  --lime-dark: #a8d020;
+  --white: #ffffff;
+  --gray: #888888;
+  --light-gray: #cccccc;
+  --found: #22c55e;
+  --found-bg: #052010;
+  --danger: #ef4444;
+  --gold: #fbbf24;
+  --admin-accent: #f97316;
 
-  /* ===== SPLASH ===== */
-  .splash { position:fixed; inset:0; z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center; background: linear-gradient(160deg, #2a5a2a 0%, #3d7a3d 50%, #1a3a1a 100%); padding:30px; }
-  .splash-egg { font-size:80px; animation: wobble 2s ease-in-out infinite; margin-bottom:16px; }
-  @keyframes wobble { 0%,100%{transform:rotate(-8deg) scale(1)} 50%{transform:rotate(8deg) scale(1.05)} }
-  .splash-title { font-family:'Fredoka',sans-serif; font-size:36px; font-weight:700; color:white; text-align:center; margin-bottom:6px; text-shadow:0 2px 8px rgba(0,0,0,0.3); }
-  .splash-sub { font-size:16px; color:rgba(255,255,255,0.75); margin-bottom:48px; text-align:center; }
-  .splash-btns { display:flex; flex-direction:column; gap:14px; width:100%; max-width:320px; }
-  .splash-btn { padding:18px; border:none; border-radius:18px; font-family:'Fredoka',sans-serif; font-size:22px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition:transform 0.15s, box-shadow 0.15s; -webkit-appearance:none; }
-  .splash-btn:active { transform:scale(0.96); }
-  .splash-btn.hider { background:var(--parch); color:var(--grass-dark); box-shadow:0 6px 20px rgba(0,0,0,0.25); }
-  .splash-btn.hunter { background:var(--hunter-bg); color:var(--hunter-accent); box-shadow:0 6px 20px rgba(0,0,0,0.35); border:2px solid var(--hunter-accent); }
-  .splash.hidden { display:none; }
+  /* Admin */
+  --parch: #fdf6e3;
+  --parch-dark: #f0e4c0;
+  --parch-darker: #e0d0a0;
+  --grass: #2d6a2d;
+  --grass-dark: #1a4a1a;
+  --ink: #1a1a1a;
+}
 
-  /* ===== PIN SCREEN ===== */
-  .pin-screen { position:fixed; inset:0; z-index:999; display:flex; flex-direction:column; align-items:center; justify-content:center; background:linear-gradient(160deg,#2a5a2a,#3d7a3d); padding:30px; }
-  .pin-screen.hidden { display:none; }
-  .pin-title { font-family:'Fredoka',sans-serif; font-size:28px; font-weight:700; color:white; margin-bottom:8px; }
-  .pin-sub { font-size:15px; color:rgba(255,255,255,0.7); margin-bottom:32px; }
-  .pin-dots { display:flex; gap:14px; margin-bottom:32px; }
-  .pin-dot { width:18px; height:18px; border-radius:50%; border:2.5px solid rgba(255,255,255,0.6); background:transparent; transition:background 0.15s; }
-  .pin-dot.filled { background:white; border-color:white; }
-  .pin-pad { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; width:100%; max-width:280px; }
-  .pin-key { padding:18px; border:none; border-radius:14px; background:rgba(255,255,255,0.15); color:white; font-family:'Fredoka',sans-serif; font-size:24px; font-weight:600; cursor:pointer; -webkit-appearance:none; transition:background 0.1s; }
-  .pin-key:active { background:rgba(255,255,255,0.35); }
-  .pin-key.del { font-size:18px; }
-  .pin-error { color:#ff7070; font-size:14px; font-weight:700; margin-top:16px; min-height:20px; }
-  .pin-back { margin-top:20px; background:transparent; border:none; color:rgba(255,255,255,0.6); font-family:'Nunito',sans-serif; font-size:15px; cursor:pointer; text-decoration:underline; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-  /* ===== ADMIN HEADER ===== */
-  .header { background:var(--parch); border-bottom:3px solid var(--parch-darker); padding:14px 16px 12px; position:sticky; top:0; z-index:100; box-shadow:0 3px 12px var(--shadow); }
-  .header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-  .app-title { font-family:'Fredoka',sans-serif; font-size:24px; font-weight:700; color:var(--grass-dark); display:flex; align-items:center; gap:6px; }
-  .app-title span.egg-icon { font-size:26px; animation:wobble 3s ease-in-out infinite; }
-  .stat-chip { background:var(--grass); color:white; border-radius:20px; padding:4px 10px; font-size:12px; font-weight:700; display:flex; align-items:center; gap:4px; }
-  .stat-chip.found { background:var(--found-green); }
-  .stat-chip.total { background:var(--grass-dark); }
-  .stat-chip.money { background:var(--accent); }
-  .sync-dot { width:9px; height:9px; border-radius:50%; background:#4caf50; box-shadow:0 0 0 2px rgba(76,175,80,0.3); animation:pulse-green 2s infinite; }
-  .sync-dot.syncing { background:#ffa726; animation:pulse-orange 1s infinite; }
-  .sync-dot.error { background:#ef5350; animation:none; }
-  @keyframes pulse-green { 0%,100%{box-shadow:0 0 0 2px rgba(76,175,80,0.3)} 50%{box-shadow:0 0 0 5px rgba(76,175,80,0.1)} }
-  @keyframes pulse-orange { 0%,100%{box-shadow:0 0 0 2px rgba(255,167,38,0.3)} 50%{box-shadow:0 0 0 5px rgba(255,167,38,0.1)} }
-  .sync-label { font-size:11px; font-weight:700; color:#888; display:flex; align-items:center; gap:4px; }
-  .logout-btn { background:transparent; border:none; font-size:12px; color:#999; cursor:pointer; font-family:'Nunito',sans-serif; text-decoration:underline; }
-  .tabs { display:flex; background:var(--parch-dark); border-radius:12px; padding:3px; margin-top:10px; }
-  .tab-btn { flex:1; padding:8px 4px; border:none; background:transparent; font-family:'Fredoka',sans-serif; font-size:15px; font-weight:600; color:var(--grass-dark); border-radius:10px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:4px; }
-  .tab-btn.active { background:var(--parch); box-shadow:0 2px 8px var(--shadow); }
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--black);
+  min-height: 100vh;
+  color: var(--white);
+  overflow-x: hidden;
+}
 
-  /* ===== MAIN ===== */
-  .main { position:relative; z-index:1; padding:0 0 120px; }
-  .view { display:none; }
-  .view.active { display:block; }
+/* ============ SPLASH ============ */
+.splash {
+  position: fixed; inset: 0; z-index: 1000;
+  background: var(--black);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 32px;
+}
+.splash.hidden { display: none; }
 
-  /* ===== ADD EGG FORM ===== */
-  .add-panel { background:var(--parch); margin:14px 12px; border-radius:20px; padding:20px; box-shadow:0 4px 16px var(--shadow), 0 0 0 2px var(--parch-darker); }
-  .panel-title { font-family:'Fredoka',sans-serif; font-size:20px; font-weight:700; color:var(--grass-dark); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
-  .field-group { margin-bottom:14px; }
-  .field-label { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--grass-dark); margin-bottom:6px; display:block; }
-  .field-input { width:100%; padding:12px 14px; border:2px solid var(--parch-darker); border-radius:12px; font-family:'Nunito',sans-serif; font-size:16px; background:white; color:var(--ink); outline:none; transition:border-color 0.2s; -webkit-appearance:none; }
-  .field-input:focus { border-color:var(--grass); }
-  .money-input-wrap { position:relative; }
-  .money-prefix { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:18px; font-weight:700; color:var(--grass-dark); }
-  .money-input-wrap .field-input { padding-left:28px; }
-  .gps-btn { width:100%; padding:13px; background:var(--grass); color:white; border:none; border-radius:12px; font-family:'Fredoka',sans-serif; font-size:17px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background 0.2s,transform 0.1s; -webkit-appearance:none; }
-  .gps-btn:active { transform:scale(0.97); background:var(--grass-dark); }
-  .gps-btn.locked { background:var(--found-green); }
-  .gps-btn.loading { background:var(--grass-light); }
-  .coords-display { background:#e8f5e9; border:2px solid #a5d6a7; border-radius:10px; padding:10px 14px; margin-top:8px; font-size:13px; font-weight:600; color:#2e7d32; display:none; font-family:'Courier New',monospace; }
-  .coords-display.visible { display:block; }
-  .photo-row { display:flex; gap:10px; align-items:stretch; }
-  .photo-btn-wrap { flex:1; }
-  .photo-btn { width:100%; height:100%; min-height:52px; padding:10px; background:var(--parch-dark); border:2px dashed var(--parch-darker); border-radius:12px; font-family:'Fredoka',sans-serif; font-size:15px; font-weight:600; color:var(--grass-dark); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.2s; -webkit-appearance:none; }
-  .photo-btn.has-photo { border-style:solid; border-color:var(--grass); background:#e8f5e9; }
-  .photo-preview-thumb { width:60px; height:60px; object-fit:cover; border-radius:10px; border:2px solid var(--grass); display:none; flex-shrink:0; }
-  .photo-preview-thumb.visible { display:block; }
-  .color-row { display:flex; gap:8px; flex-wrap:wrap; }
-  .color-swatch { width:36px; height:36px; border-radius:50%; border:3px solid transparent; cursor:pointer; transition:transform 0.15s,border-color 0.15s; -webkit-appearance:none; }
-  .color-swatch.selected { border-color:var(--ink); transform:scale(1.15); }
-  .save-btn { width:100%; padding:15px; background:var(--accent); color:white; border:none; border-radius:14px; font-family:'Fredoka',sans-serif; font-size:20px; font-weight:700; cursor:pointer; margin-top:6px; display:flex; align-items:center; justify-content:center; gap:8px; transition:all 0.2s; box-shadow:0 4px 12px rgba(232,82,42,0.35); -webkit-appearance:none; }
-  .save-btn:active { transform:scale(0.97); }
-  #camera-input { display:none; }
+.splash-badge {
+  width: 100px; height: 100px;
+  background: var(--lime);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 52px;
+  margin-bottom: 32px;
+  animation: pulse-badge 2s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(200,241,53,0.4);
+}
+@keyframes pulse-badge {
+  0%,100% { box-shadow: 0 0 0 0 rgba(200,241,53,0.4); }
+  50% { box-shadow: 0 0 0 20px rgba(200,241,53,0); }
+}
 
-  /* ===== LIST ===== */
-  .list-controls { padding:12px 12px 6px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
-  .list-controls::-webkit-scrollbar { display:none; }
-  .filter-chip { flex-shrink:0; padding:6px 14px; border-radius:20px; border:2px solid var(--parch-darker); background:var(--parch); font-family:'Fredoka',sans-serif; font-size:14px; font-weight:600; color:var(--grass-dark); cursor:pointer; transition:all 0.15s; -webkit-appearance:none; }
-  .filter-chip.active { background:var(--grass); border-color:var(--grass); color:white; }
-  .egg-list { padding:6px 12px; display:flex; flex-direction:column; gap:10px; }
-  .egg-card { background:var(--parch); border-radius:18px; overflow:hidden; box-shadow:0 3px 10px var(--shadow); border:2px solid var(--parch-darker); animation:slideIn 0.3s ease; }
-  .egg-card.is-found { border-color:#a5d6a7; background:#f1f8e9; }
-  @keyframes slideIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-  .egg-card-inner { display:flex; align-items:stretch; }
-  .egg-color-bar { width:6px; flex-shrink:0; min-height:80px; }
-  .egg-card-body { flex:1; padding:12px 14px; min-width:0; }
-  .egg-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
-  .egg-name { font-family:'Fredoka',sans-serif; font-size:18px; font-weight:700; color:var(--ink); }
-  .egg-money { font-family:'Fredoka',sans-serif; font-size:18px; font-weight:700; color:var(--accent); flex-shrink:0; }
-  .egg-coords { font-size:11px; color:#888; font-family:'Courier New',monospace; margin-top:3px; }
-  .egg-note { font-size:13px; color:#666; margin-top:4px; line-height:1.4; }
-  .found-badge { display:inline-flex; align-items:center; gap:3px; background:var(--found-green); color:white; border-radius:10px; padding:2px 8px; font-size:11px; font-weight:700; margin-top:4px; }
-  .egg-card-actions { display:flex; gap:6px; margin-top:10px; }
-  .egg-action-btn { flex:1; padding:7px 8px; border:none; border-radius:9px; font-family:'Fredoka',sans-serif; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:4px; -webkit-appearance:none; }
-  .btn-found { background:var(--found-green); color:white; }
-  .btn-unfound { background:#ffa726; color:white; }
-  .btn-nav { background:#7ab8e8; color:white; }
-  .btn-delete { background:#ef5350; color:white; }
-  .btn-photo-view { background:var(--grass-light); color:white; }
-  .egg-photo-thumb { width:68px; flex-shrink:0; }
-  .egg-photo-thumb img { width:68px; height:100%; object-fit:cover; display:block; min-height:80px; cursor:pointer; }
-  .empty-state { text-align:center; padding:60px 20px; color:white; }
-  .empty-icon { font-size:64px; display:block; margin-bottom:12px; animation:bounce 2s ease-in-out infinite; }
-  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-  .empty-title { font-family:'Fredoka',sans-serif; font-size:24px; font-weight:700; margin-bottom:6px; text-shadow:0 2px 4px rgba(0,0,0,0.2); }
-  .empty-sub { font-size:15px; opacity:0.85; }
+.splash-eyebrow {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: var(--lime); margin-bottom: 8px;
+}
+.splash-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 56px; font-weight: 900;
+  text-transform: uppercase; line-height: 0.95;
+  color: var(--white); text-align: center;
+  margin-bottom: 8px;
+}
+.splash-sub {
+  font-size: 15px; color: var(--gray);
+  margin-bottom: 56px; text-align: center;
+}
+.splash-btns { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 340px; }
 
-  /* ===== MAP (ADMIN) ===== */
-  .map-view-wrap { padding:12px; }
-  .map-container { background:var(--parch); border-radius:20px; overflow:hidden; box-shadow:0 4px 16px var(--shadow); border:2px solid var(--parch-darker); }
-  .map-header { padding:14px 16px 10px; background:var(--parch); border-bottom:2px solid var(--parch-darker); }
-  .map-title { font-family:'Fredoka',sans-serif; font-size:18px; font-weight:700; color:var(--grass-dark); margin-bottom:4px; }
-  .map-sub { font-size:12px; color:#888; }
-  #map-frame { width:100%; height:420px; border:none; display:block; }
-  .map-legend { padding:12px 16px; background:var(--parch); border-top:2px solid var(--parch-darker); display:flex; gap:16px; flex-wrap:wrap; }
-  .legend-item { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--ink); }
-  .legend-dot { width:14px; height:14px; border-radius:50%; flex-shrink:0; }
-  .map-egg-list { padding:0 12px 12px; display:flex; flex-direction:column; gap:8px; margin-top:12px; }
-  .map-egg-row { background:var(--parch); border-radius:14px; padding:11px 14px; display:flex; align-items:center; gap:10px; box-shadow:0 2px 8px var(--shadow); border:2px solid var(--parch-darker); }
-  .map-egg-dot { width:18px; height:18px; border-radius:50%; flex-shrink:0; border:2px solid rgba(0,0,0,0.15); }
-  .map-egg-info { flex:1; min-width:0; }
-  .map-egg-name { font-family:'Fredoka',sans-serif; font-size:16px; font-weight:700; color:var(--ink); }
-  .map-egg-coord { font-size:11px; color:#999; font-family:monospace; }
-  .map-nav-btn { background:var(--grass); color:white; border:none; border-radius:10px; padding:8px 12px; font-family:'Fredoka',sans-serif; font-size:14px; font-weight:600; cursor:pointer; -webkit-appearance:none; }
+.splash-btn {
+  width: 100%; padding: 20px 24px;
+  border: none; border-radius: 16px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1px;
+  cursor: pointer; display: flex; align-items: center;
+  justify-content: space-between;
+  transition: transform 0.12s, box-shadow 0.12s;
+  -webkit-appearance: none;
+}
+.splash-btn:active { transform: scale(0.97); }
+.splash-btn .btn-arrow { font-size: 20px; opacity: 0.6; }
 
-  /* ===== PHOTO MODAL ===== */
-  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:2000; display:none; align-items:center; justify-content:center; padding:20px; }
-  .modal-overlay.open { display:flex; }
-  .modal-box { background:var(--parch); border-radius:20px; padding:20px; max-width:400px; width:100%; max-height:85vh; overflow-y:auto; position:relative; }
-  .modal-box img { width:100%; border-radius:12px; margin-bottom:12px; }
-  .modal-title { font-family:'Fredoka',sans-serif; font-size:22px; font-weight:700; color:var(--grass-dark); margin-bottom:8px; }
-  .modal-detail { font-size:14px; color:#555; margin-bottom:6px; }
-  .modal-close { width:100%; margin-top:14px; padding:13px; background:var(--grass); color:white; border:none; border-radius:12px; font-family:'Fredoka',sans-serif; font-size:17px; font-weight:600; cursor:pointer; -webkit-appearance:none; display:block; }
+.splash-btn.hider {
+  background: var(--lime); color: var(--black);
+  box-shadow: 0 8px 32px rgba(200,241,53,0.3);
+}
+.splash-btn.hunter {
+  background: var(--white); color: var(--black);
+  box-shadow: 0 8px 32px rgba(255,255,255,0.1);
+}
 
-  /* ===== TOAST ===== */
-  .toast { position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:white; padding:12px 20px; border-radius:30px; font-family:'Fredoka',sans-serif; font-size:16px; font-weight:600; z-index:3000; opacity:0; transition:all 0.3s; white-space:nowrap; box-shadow:0 4px 16px rgba(0,0,0,0.3); }
-  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+/* ============ PIN ============ */
+.pin-screen {
+  position: fixed; inset: 0; z-index: 999;
+  background: var(--black);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 32px;
+}
+.pin-screen.hidden { display: none; }
+.pin-eyebrow { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:4px; text-transform:uppercase; color:var(--admin-accent); margin-bottom:8px; }
+.pin-title { font-family:'Barlow Condensed',sans-serif; font-size:40px; font-weight:900; text-transform:uppercase; color:var(--white); margin-bottom:4px; }
+.pin-sub { font-size:14px; color:var(--gray); margin-bottom:40px; }
+.pin-dots { display:flex; gap:16px; margin-bottom:40px; }
+.pin-dot { width:20px; height:20px; border-radius:50%; border:2px solid var(--border); background:transparent; transition:all 0.15s; }
+.pin-dot.filled { background:var(--admin-accent); border-color:var(--admin-accent); box-shadow:0 0 12px rgba(249,115,22,0.5); }
+.pin-pad { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:100%; max-width:280px; }
+.pin-key { padding:20px; border:none; border-radius:14px; background:var(--card); color:var(--white); font-family:'Barlow Condensed',sans-serif; font-size:26px; font-weight:700; cursor:pointer; border:1px solid var(--border); transition:background 0.1s,transform 0.1s; -webkit-appearance:none; }
+.pin-key:active { background:var(--admin-accent); transform:scale(0.94); }
+.pin-key.del { font-size:18px; color:var(--gray); }
+.pin-error { color:var(--danger); font-size:13px; font-weight:700; margin-top:16px; min-height:20px; letter-spacing:1px; }
+.pin-back { margin-top:20px; background:transparent; border:none; color:var(--gray); font-family:'Barlow',sans-serif; font-size:14px; cursor:pointer; text-decoration:underline; }
 
-  /* ===== HUNTER VIEW ===== */
-  .hunter-wrap { min-height:100vh; background:var(--hunter-bg); display:flex; flex-direction:column; }
-  .hunter-header { background:#132038; padding:14px 16px 12px; position:sticky; top:0; z-index:100; box-shadow:0 3px 12px rgba(0,0,0,0.4); }
-  .hunter-header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-  .hunter-title { font-family:'Fredoka',sans-serif; font-size:24px; font-weight:700; color:var(--hunter-accent); display:flex; align-items:center; gap:8px; }
-  .hunter-stats { display:flex; gap:8px; align-items:center; }
-  .hunter-chip { background:rgba(255,255,255,0.1); color:white; border-radius:20px; padding:4px 12px; font-size:13px; font-weight:700; }
-  .hunter-chip.found-chip { background:var(--found-green); }
-  .hunter-tabs { display:flex; background:rgba(255,255,255,0.08); border-radius:12px; padding:3px; }
-  .hunter-tab { flex:1; padding:8px 4px; border:none; background:transparent; font-family:'Fredoka',sans-serif; font-size:15px; font-weight:600; color:rgba(255,255,255,0.6); border-radius:10px; cursor:pointer; transition:all 0.2s; -webkit-appearance:none; }
-  .hunter-tab.active { background:var(--hunter-accent); color:var(--hunter-bg); }
-  .hunter-view { display:none; }
-  .hunter-view.active { display:block; }
+/* ============ ADMIN SHELL ============ */
+#admin-wrap { display:none; background:var(--parch); min-height:100vh; }
 
-  /* Hunter Map */
-  .hunter-map-wrap { padding:12px; }
-  .hunter-map-box { border-radius:20px; overflow:hidden; border:2px solid rgba(255,255,255,0.1); box-shadow:0 4px 20px rgba(0,0,0,0.4); }
-  #hunter-map-frame { width:100%; height:480px; border:none; display:block; }
-  .hunter-legend { background:#132038; padding:12px 16px; display:flex; gap:16px; flex-wrap:wrap; }
-  .hunter-legend-item { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:rgba(255,255,255,0.8); }
+.admin-header {
+  background: var(--parch);
+  border-bottom: 3px solid var(--parch-darker);
+  padding: 14px 16px 12px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+  font-family: 'Barlow', sans-serif;
+  color: var(--ink);
+}
+.admin-header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.admin-title { font-family:'Barlow Condensed',sans-serif; font-size:26px; font-weight:900; text-transform:uppercase; color:var(--grass-dark); display:flex; align-items:center; gap:8px; letter-spacing:1px; }
+.admin-chips { display:flex; gap:6px; align-items:center; }
+.achip { border-radius:20px; padding:4px 10px; font-size:12px; font-weight:700; color:white; }
+.achip.total { background:var(--grass-dark); }
+.achip.found { background:var(--found); }
+.achip.money { background:var(--admin-accent); }
+.sync-dot { width:8px; height:8px; border-radius:50%; background:var(--found); animation:pulse-green 2s infinite; }
+.sync-dot.syncing { background:var(--gold); animation:pulse-orange 1s infinite; }
+.sync-dot.error { background:var(--danger); animation:none; }
+@keyframes pulse-green { 0%,100%{box-shadow:0 0 0 2px rgba(34,197,94,0.3)} 50%{box-shadow:0 0 0 6px rgba(34,197,94,0)} }
+@keyframes pulse-orange { 0%,100%{box-shadow:0 0 0 2px rgba(251,191,36,0.3)} 50%{box-shadow:0 0 0 6px rgba(251,191,36,0)} }
+.exit-btn { background:transparent; border:none; color:#aaa; font-size:12px; cursor:pointer; font-family:'Barlow',sans-serif; text-decoration:underline; }
+.admin-tabs { display:flex; background:var(--parch-dark); border-radius:12px; padding:3px; gap:3px; }
+.atab { flex:1; padding:8px 4px; border:none; background:transparent; font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--grass-dark); border-radius:10px; cursor:pointer; transition:all 0.2s; -webkit-appearance:none; }
+.atab.active { background:var(--parch); box-shadow:0 2px 8px rgba(0,0,0,0.1); }
 
-  /* Hunter List */
-  .hunter-list { padding:10px 12px; display:flex; flex-direction:column; gap:10px; }
-  .hunter-egg-card { background:#132038; border-radius:18px; overflow:hidden; border:2px solid rgba(255,255,255,0.08); box-shadow:0 3px 12px rgba(0,0,0,0.3); animation:slideIn 0.3s ease; }
-  .hunter-egg-card.is-found { border-color:rgba(76,175,80,0.4); background:#0d2b0d; }
-  .hunter-egg-inner { display:flex; align-items:stretch; }
-  .hunter-color-bar { width:6px; flex-shrink:0; min-height:80px; }
-  .hunter-egg-body { flex:1; padding:14px 16px; }
-  .hunter-egg-top { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
-  .hunter-egg-label { font-family:'Fredoka',sans-serif; font-size:20px; font-weight:700; color:white; }
-  .hunter-found-badge { display:inline-flex; align-items:center; gap:4px; background:var(--found-green); color:white; border-radius:10px; padding:3px 10px; font-size:12px; font-weight:700; }
-  .hunter-egg-actions { display:flex; gap:8px; }
-  .hunter-found-btn { flex:1; padding:12px; border:none; border-radius:12px; font-family:'Fredoka',sans-serif; font-size:17px; font-weight:700; cursor:pointer; -webkit-appearance:none; transition:transform 0.1s; }
-  .hunter-found-btn:active { transform:scale(0.96); }
-  .hunter-found-btn.not-found { background:var(--hunter-accent); color:var(--hunter-bg); }
-  .hunter-found-btn.already-found { background:rgba(76,175,80,0.2); color:#81c784; border:2px solid rgba(76,175,80,0.3); }
-  .hunter-nav-btn { padding:12px 16px; background:rgba(255,255,255,0.1); color:white; border:none; border-radius:12px; font-family:'Fredoka',sans-serif; font-size:15px; font-weight:600; cursor:pointer; -webkit-appearance:none; }
-  .hunter-empty { text-align:center; padding:60px 20px; color:rgba(255,255,255,0.5); }
-  .hunter-empty-icon { font-size:56px; display:block; margin-bottom:12px; }
-  .hunter-empty-title { font-family:'Fredoka',sans-serif; font-size:22px; font-weight:700; margin-bottom:6px; }
+.admin-main { padding:0 0 120px; }
+.aview { display:none; }
+.aview.active { display:block; }
 
-  /* Hunter filter chips */
-  .hunter-controls { padding:10px 12px 4px; display:flex; gap:8px; }
-  .hunter-filter { flex-shrink:0; padding:6px 14px; border-radius:20px; border:2px solid rgba(255,255,255,0.15); background:transparent; font-family:'Fredoka',sans-serif; font-size:14px; font-weight:600; color:rgba(255,255,255,0.7); cursor:pointer; -webkit-appearance:none; }
-  .hunter-filter.active { background:var(--hunter-accent); border-color:var(--hunter-accent); color:var(--hunter-bg); }
+/* Admin form */
+.add-panel { background:var(--parch); margin:14px 12px; border-radius:20px; padding:20px; box-shadow:0 4px 16px rgba(0,0,0,0.08), 0 0 0 2px var(--parch-darker); }
+.panel-title { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:900; text-transform:uppercase; color:var(--grass-dark); margin-bottom:20px; letter-spacing:1px; }
+.field-group { margin-bottom:14px; }
+.field-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:var(--grass-dark); margin-bottom:6px; display:block; }
+.field-input { width:100%; padding:12px 14px; border:2px solid var(--parch-darker); border-radius:12px; font-family:'Barlow',sans-serif; font-size:16px; background:white; color:var(--ink); outline:none; -webkit-appearance:none; }
+.field-input:focus { border-color:var(--grass); }
+.money-wrap { position:relative; }
+.money-prefix { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:18px; font-weight:700; color:var(--grass-dark); }
+.money-wrap .field-input { padding-left:28px; }
+.gps-btn { width:100%; padding:14px; background:var(--grass); color:white; border:none; border-radius:12px; font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; -webkit-appearance:none; }
+.gps-btn.locked { background:var(--found); }
+.gps-btn.loading { opacity:0.7; }
+.coords-display { background:#e8f5e9; border:2px solid #a5d6a7; border-radius:10px; padding:10px 14px; margin-top:8px; font-size:12px; font-weight:600; color:#2e7d32; display:none; font-family:'Courier New',monospace; }
+.coords-display.visible { display:block; }
+.photo-row { display:flex; gap:10px; align-items:stretch; }
+.photo-btn { flex:1; min-height:52px; padding:10px; background:var(--parch-dark); border:2px dashed var(--parch-darker); border-radius:12px; font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:700; color:var(--grass-dark); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; -webkit-appearance:none; }
+.photo-btn.has-photo { border-style:solid; border-color:var(--grass); background:#e8f5e9; }
+.photo-thumb-prev { width:60px; height:60px; object-fit:cover; border-radius:10px; border:2px solid var(--grass); display:none; flex-shrink:0; }
+.photo-thumb-prev.visible { display:block; }
+.color-row { display:flex; gap:8px; flex-wrap:wrap; }
+.cswatch { width:36px; height:36px; border-radius:50%; border:3px solid transparent; cursor:pointer; -webkit-appearance:none; }
+.cswatch.selected { border-color:var(--ink); transform:scale(1.15); }
+.save-btn { width:100%; padding:16px; background:var(--admin-accent); color:white; border:none; border-radius:14px; font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:900; text-transform:uppercase; letter-spacing:1px; cursor:pointer; -webkit-appearance:none; box-shadow:0 4px 16px rgba(249,115,22,0.4); }
+.clear-btn { width:100%; padding:14px; background:transparent; color:var(--danger); border:2px solid var(--danger); border-radius:14px; font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:800; text-transform:uppercase; letter-spacing:1px; cursor:pointer; -webkit-appearance:none; margin-top:8px; }
+#camera-input { display:none; }
+
+/* Admin list */
+.list-controls { padding:12px 12px 6px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
+.list-controls::-webkit-scrollbar { display:none; }
+.fchip { flex-shrink:0; padding:6px 14px; border-radius:20px; border:2px solid var(--parch-darker); background:var(--parch); font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--grass-dark); cursor:pointer; -webkit-appearance:none; }
+.fchip.active { background:var(--grass); border-color:var(--grass); color:white; }
+.egg-list { padding:6px 12px; display:flex; flex-direction:column; gap:10px; }
+.egg-card { background:var(--parch); border-radius:16px; overflow:hidden; border:2px solid var(--parch-darker); }
+.egg-card.is-found { border-color:#a5d6a7; background:#f1f8e9; }
+.egg-card-inner { display:flex; align-items:stretch; }
+.egg-color-bar { width:6px; flex-shrink:0; }
+.egg-card-body { flex:1; padding:12px 14px; min-width:0; }
+.egg-card-top { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
+.egg-num { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:900; text-transform:uppercase; color:var(--ink); }
+.egg-money-tag { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:900; color:var(--admin-accent); }
+.egg-coords { font-size:11px; color:#888; font-family:'Courier New',monospace; }
+.egg-note { font-size:13px; color:#555; margin-top:3px; }
+.found-badge { display:inline-flex; align-items:center; gap:3px; background:var(--found); color:white; border-radius:8px; padding:2px 8px; font-size:11px; font-weight:700; margin-top:4px; }
+.egg-actions { display:flex; gap:6px; margin-top:10px; }
+.eabtn { flex:1; padding:8px; border:none; border-radius:8px; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; text-transform:uppercase; cursor:pointer; -webkit-appearance:none; }
+.btn-found { background:var(--found); color:white; }
+.btn-unfound { background:#f97316; color:white; }
+.btn-nav { background:#3b82f6; color:white; }
+.btn-delete { background:var(--danger); color:white; }
+.btn-photo { background:var(--grass); color:white; }
+.egg-photo-thumb { width:68px; flex-shrink:0; }
+.egg-photo-thumb img { width:68px; height:100%; object-fit:cover; display:block; min-height:80px; cursor:pointer; }
+
+/* Admin map */
+.map-wrap { padding:12px; }
+.map-box { background:var(--parch); border-radius:20px; overflow:hidden; border:2px solid var(--parch-darker); }
+.map-hdr { padding:14px 16px 10px; }
+.map-hdr-title { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:900; text-transform:uppercase; color:var(--grass-dark); }
+.map-hdr-sub { font-size:12px; color:#888; }
+#map-frame { width:100%; height:420px; border:none; display:block; }
+.map-legend { padding:10px 16px; border-top:2px solid var(--parch-darker); display:flex; gap:16px; }
+.legend-item { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--ink); }
+.legend-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+.map-egg-list { padding:0 12px 12px; display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+.map-egg-row { background:var(--parch); border-radius:12px; padding:10px 14px; display:flex; align-items:center; gap:10px; border:2px solid var(--parch-darker); }
+.map-egg-dot { width:16px; height:16px; border-radius:50%; flex-shrink:0; border:2px solid rgba(0,0,0,0.1); }
+.map-egg-info { flex:1; min-width:0; }
+.map-egg-name { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:800; text-transform:uppercase; color:var(--ink); }
+.map-egg-coord { font-size:11px; color:#888; font-family:monospace; }
+.map-nav-btn { background:var(--grass); color:white; border:none; border-radius:8px; padding:8px 12px; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; text-transform:uppercase; cursor:pointer; -webkit-appearance:none; }
+
+/* Admin empty */
+.a-empty { text-align:center; padding:50px 20px; color:#888; }
+.a-empty-icon { font-size:48px; display:block; margin-bottom:10px; }
+.a-empty-title { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:800; color:#555; }
+
+/* Admin photo modal */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:var(--parch); border-radius:20px; padding:20px; max-width:400px; width:100%; max-height:85vh; overflow-y:auto; }
+.modal-box img { width:100%; border-radius:12px; margin-bottom:12px; }
+.modal-title { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:900; color:var(--grass-dark); margin-bottom:8px; text-transform:uppercase; }
+.modal-detail { font-size:14px; color:#555; margin-bottom:6px; }
+.modal-close { width:100%; margin-top:14px; padding:13px; background:var(--grass); color:white; border:none; border-radius:12px; font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:800; text-transform:uppercase; cursor:pointer; -webkit-appearance:none; }
+
+/* ============ HUNTER SHELL ============ */
+#hunter-wrap {
+  display: none;
+  min-height: 100vh;
+  background: var(--black);
+  flex-direction: column;
+}
+
+/* Hunter header */
+.h-header {
+  background: var(--dark);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px 14px;
+  position: sticky; top: 0; z-index: 100;
+}
+.h-header-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.h-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px; font-weight: 900;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--lime);
+}
+.h-prize-pill {
+  background: var(--lime);
+  color: var(--black);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px; font-weight: 900;
+  letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 6px;
+}
+.h-stats-row {
+  display: flex; gap: 8px; align-items: center; margin-bottom: 14px;
+}
+.h-stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 14px;
+  font-size: 13px; font-weight: 700;
+  color: var(--light-gray);
+  display: flex; align-items: center; gap: 6px;
+}
+.h-stat .val { color: var(--white); font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 900; }
+.h-stat.green .val { color: var(--lime); }
+.h-exit { background:transparent; border:none; color:var(--gray); font-size:12px; cursor:pointer; font-family:'Barlow',sans-serif; text-decoration:underline; }
+.h-tabs {
+  display: flex; gap: 8px;
+}
+.h-tab {
+  flex: 1; padding: 10px; border: none;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--gray); cursor: pointer;
+  transition: all 0.18s; -webkit-appearance: none;
+}
+.h-tab.active {
+  background: var(--lime); color: var(--black);
+  border-color: var(--lime);
+}
+
+.h-view { display: none; }
+.h-view.active { display: block; }
+
+/* Hunter map */
+.h-map-wrap { padding: 12px 12px 0; }
+.h-map-box { border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
+#hunter-map-frame { width: 100%; height: 420px; border: none; display: block; }
+.h-map-legend {
+  background: var(--card); border: 1px solid var(--border);
+  border-top: none; border-radius: 0 0 20px 20px;
+  padding: 10px 16px; display: flex; gap: 20px;
+}
+.h-legend-item { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--gray); }
+
+/* Hunter egg list below map */
+.h-egg-section {
+  padding: 16px 12px 120px;
+}
+.h-section-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: var(--gray); margin-bottom: 12px;
+  padding: 0 4px;
+}
+.h-filter-row { display:flex; gap:8px; margin-bottom:14px; }
+.h-filter {
+  padding: 6px 16px; border-radius: 100px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 700; text-transform: uppercase;
+  color: var(--gray); cursor: pointer; -webkit-appearance: none;
+}
+.h-filter.active { background: var(--lime); color: var(--black); border-color: var(--lime); }
+
+.h-egg-grid { display: flex; flex-direction: column; gap: 10px; }
+
+.h-egg-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.h-egg-card.is-found {
+  background: var(--found-bg);
+  border-color: rgba(34,197,94,0.3);
+}
+.h-egg-inner { display: flex; align-items: stretch; }
+.h-color-stripe { width: 5px; flex-shrink: 0; }
+.h-egg-content { flex: 1; padding: 16px 18px; }
+.h-egg-top {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 12px;
+}
+.h-egg-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 24px; font-weight: 900;
+  text-transform: uppercase; color: var(--white);
+}
+.h-found-pill {
+  background: var(--found);
+  color: white; border-radius: 100px;
+  padding: 4px 12px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.h-egg-btns { display: flex; gap: 8px; }
+.h-found-btn {
+  flex: 1; padding: 13px;
+  border: none; border-radius: 12px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px; font-weight: 900;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  cursor: pointer; -webkit-appearance: none;
+  transition: transform 0.1s;
+}
+.h-found-btn:active { transform: scale(0.96); }
+.h-found-btn.claim { background: var(--lime); color: var(--black); }
+.h-found-btn.claimed {
+  background: rgba(34,197,94,0.1);
+  color: rgba(34,197,94,0.5);
+  border: 1px solid rgba(34,197,94,0.2);
+}
+.h-nav-btn {
+  padding: 13px 16px;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--white); border-radius: 12px;
+  font-size: 18px; cursor: pointer; -webkit-appearance: none;
+}
+.h-empty {
+  text-align: center; padding: 50px 20px; color: var(--gray);
+}
+.h-empty-icon { font-size: 48px; display: block; margin-bottom: 12px; }
+.h-empty-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; text-transform: uppercase; }
+
+/* ============ CELEBRATION ============ */
+.celebration-overlay {
+  position: fixed; inset: 0; z-index: 5000;
+  pointer-events: none;
+  display: none;
+}
+.celebration-overlay.active { display: block; }
+
+.celebration-content {
+  position: fixed; top: 0; left: 0; right: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 5001;
+}
+.celebration-card {
+  background: var(--lime);
+  border-radius: 28px;
+  padding: 36px 48px;
+  text-align: center;
+  transform: scale(0);
+  animation: pop-in 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.2s forwards;
+  box-shadow: 0 20px 80px rgba(200,241,53,0.5);
+  pointer-events: all;
+}
+@keyframes pop-in {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.celeb-emoji { font-size: 64px; display: block; margin-bottom: 8px; }
+.celeb-label { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; color: rgba(0,0,0,0.5); margin-bottom: 4px; }
+.celeb-amount {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 80px; font-weight: 900; line-height: 1;
+  color: var(--black);
+}
+.celeb-sub { font-size: 15px; color: rgba(0,0,0,0.6); margin-top: 6px; }
+.celeb-close {
+  margin-top: 20px; padding: 12px 32px;
+  background: var(--black); color: var(--lime);
+  border: none; border-radius: 100px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px; font-weight: 900; text-transform: uppercase;
+  cursor: pointer; pointer-events: all;
+}
+
+/* Confetti particles */
+.confetti-piece {
+  position: fixed;
+  width: 10px; height: 16px;
+  top: -20px;
+  border-radius: 3px;
+  animation: confetti-fall linear forwards;
+  z-index: 5000;
+}
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 90px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--dark); color: var(--white);
+  padding: 12px 20px; border-radius: 100px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 17px; font-weight: 700;
+  z-index: 3000; opacity: 0;
+  transition: all 0.3s;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
-<!-- ===== SPLASH ===== -->
+<!-- SPLASH -->
 <div class="splash" id="splash">
-  <div class="splash-egg">🥚</div>
-  <div class="splash-title">Easter Egg Hunt</div>
+  <div class="splash-badge">🥚</div>
+  <div class="splash-eyebrow">Easter · 2025</div>
+  <div class="splash-title">Egg<br>Hunt</div>
   <div class="splash-sub">Who are you today?</div>
   <div class="splash-btns">
-    <button class="splash-btn hider" onclick="goHider()">🧺 Egg Hider</button>
-    <button class="splash-btn hunter" onclick="goHunter()">🏃 Egg Hunter</button>
+    <button class="splash-btn hider" onclick="goHider()">
+      <span>🧺 Egg Hider</span><span class="btn-arrow">→</span>
+    </button>
+    <button class="splash-btn hunter" onclick="goHunter()">
+      <span>🏃 Egg Hunter</span><span class="btn-arrow">→</span>
+    </button>
   </div>
 </div>
 
-<!-- ===== PIN SCREEN ===== -->
+<!-- PIN -->
 <div class="pin-screen hidden" id="pin-screen">
-  <div class="pin-title">🔐 Egg Hider PIN</div>
-  <div class="pin-sub">Enter your secret PIN to continue</div>
+  <div class="pin-eyebrow">Admin Access</div>
+  <div class="pin-title">Enter PIN</div>
+  <div class="pin-sub">Egg Hider only — keep it secret!</div>
   <div class="pin-dots" id="pin-dots">
     <div class="pin-dot" id="pd0"></div>
     <div class="pin-dot" id="pd1"></div>
@@ -262,33 +541,33 @@
   <button class="pin-back" onclick="goSplash()">← Back</button>
 </div>
 
-<!-- ===== ADMIN VIEW ===== -->
-<div id="admin-wrap" style="display:none;">
-  <div class="header">
-    <div class="header-top">
-      <div class="app-title"><span class="egg-icon">🥚</span> Egg Hider</div>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <div style="display:flex;align-items:center;gap:4px;"><div class="sync-dot" id="sync-dot"></div><span class="sync-label" style="font-size:10px;color:#999;">Live</span></div>
-        <div class="stat-chip total" id="stat-total">🥚 0</div>
-        <div class="stat-chip found" id="stat-found">✓ 0</div>
-        <div class="stat-chip money" id="stat-money">$0</div>
-        <button class="logout-btn" onclick="goSplash()">Exit</button>
+<!-- ADMIN -->
+<div id="admin-wrap">
+  <div class="admin-header">
+    <div class="admin-header-top">
+      <div class="admin-title">🧺 Egg Hider</div>
+      <div class="admin-chips">
+        <div style="display:flex;align-items:center;gap:4px;"><div class="sync-dot" id="sync-dot"></div></div>
+        <div class="achip total" id="stat-total">🥚 0</div>
+        <div class="achip found" id="stat-found">✓ 0</div>
+        <div class="achip money" id="stat-money">$0</div>
+        <button class="exit-btn" onclick="goSplash()">Exit</button>
       </div>
     </div>
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('add')">➕ Hide Egg</button>
-      <button class="tab-btn" onclick="switchTab('list')">📋 List</button>
-      <button class="tab-btn" onclick="switchTab('map')">🗺️ Map</button>
+    <div class="admin-tabs">
+      <button class="atab active" onclick="switchAdminTab('add')">➕ Hide</button>
+      <button class="atab" onclick="switchAdminTab('list')">📋 List</button>
+      <button class="atab" onclick="switchAdminTab('map')">🗺️ Map</button>
     </div>
   </div>
-  <div class="main">
-    <!-- HIDE EGG -->
-    <div class="view active" id="view-add">
+  <div class="admin-main">
+    <!-- HIDE EGG TAB -->
+    <div class="aview active" id="aview-add">
       <div class="add-panel">
-        <div class="panel-title">🐣 Hide a New Egg</div>
+        <div class="panel-title">Hide a New Egg</div>
         <div class="field-group">
           <label class="field-label">💰 Money Amount</label>
-          <div class="money-input-wrap">
+          <div class="money-wrap">
             <span class="money-prefix">$</span>
             <input type="number" class="field-input" id="egg-money" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
           </div>
@@ -296,32 +575,30 @@
         <div class="field-group">
           <label class="field-label">📍 GPS Location</label>
           <button class="gps-btn" id="gps-btn" onclick="lockLocation()">
-            <span id="gps-btn-icon">📡</span><span id="gps-btn-text">Lock My Location</span>
+            <span id="gps-icon">📡</span><span id="gps-text">Lock My Location</span>
           </button>
           <div class="coords-display" id="coords-display"></div>
         </div>
         <div class="field-group">
           <label class="field-label">🌈 Egg Color</label>
-          <div class="color-row" id="color-row">
-            <button class="color-swatch selected" data-color="#f5c842" style="background:#f5c842" onclick="selectColor(this)"></button>
-            <button class="color-swatch" data-color="#f084a0" style="background:#f084a0" onclick="selectColor(this)"></button>
-            <button class="color-swatch" data-color="#7ab8e8" style="background:#7ab8e8" onclick="selectColor(this)"></button>
-            <button class="color-swatch" data-color="#b07ad4" style="background:#b07ad4" onclick="selectColor(this)"></button>
-            <button class="color-swatch" data-color="#5aa55a" style="background:#5aa55a" onclick="selectColor(this)"></button>
-            <button class="color-swatch" data-color="#ff7043" style="background:#ff7043" onclick="selectColor(this)"></button>
-            <button class="color-swatch" data-color="#c8a97e" style="background:#c8a97e" onclick="selectColor(this)"></button>
-            <button class="color-swatch" data-color="#ffffff" style="background:#fff;border:3px solid #ccc" onclick="selectColor(this)"></button>
+          <div class="color-row">
+            <button class="cswatch selected" data-color="#f5c842" style="background:#f5c842" onclick="selectColor(this)"></button>
+            <button class="cswatch" data-color="#f084a0" style="background:#f084a0" onclick="selectColor(this)"></button>
+            <button class="cswatch" data-color="#7ab8e8" style="background:#7ab8e8" onclick="selectColor(this)"></button>
+            <button class="cswatch" data-color="#b07ad4" style="background:#b07ad4" onclick="selectColor(this)"></button>
+            <button class="cswatch" data-color="#5aa55a" style="background:#5aa55a" onclick="selectColor(this)"></button>
+            <button class="cswatch" data-color="#ff7043" style="background:#ff7043" onclick="selectColor(this)"></button>
+            <button class="cswatch" data-color="#c8a97e" style="background:#c8a97e" onclick="selectColor(this)"></button>
+            <button class="cswatch" data-color="#ffffff" style="background:#fff;border:3px solid #ccc" onclick="selectColor(this)"></button>
           </div>
         </div>
         <div class="field-group">
           <label class="field-label">📸 Photo (Optional)</label>
           <div class="photo-row">
-            <div class="photo-btn-wrap">
-              <button class="photo-btn" id="photo-btn" onclick="document.getElementById('camera-input').click()">
-                <span>📷</span><span id="photo-btn-text">Take Photo</span>
-              </button>
-            </div>
-            <img class="photo-preview-thumb" id="photo-thumb" src="" alt="Preview">
+            <button class="photo-btn" id="photo-btn" onclick="document.getElementById('camera-input').click()">
+              <span>📷</span><span id="photo-btn-text">Take Photo</span>
+            </button>
+            <img class="photo-thumb-prev" id="photo-thumb" src="" alt="">
           </div>
           <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handlePhoto(this)">
         </div>
@@ -330,31 +607,30 @@
           <input type="text" class="field-input" id="egg-note" placeholder="e.g. Under the big rock…" autocomplete="off">
         </div>
         <button class="save-btn" onclick="saveEgg()">🥚 Save Egg Location</button>
+        <button class="clear-btn" onclick="clearAllEggs()">🗑️ Clear All Eggs & Start Over</button>
       </div>
     </div>
-
-    <!-- LIST -->
-    <div class="view" id="view-list">
+    <!-- LIST TAB -->
+    <div class="aview" id="aview-list">
       <div class="list-controls">
-        <button class="filter-chip active" data-filter="all" onclick="setFilter(this)">All Eggs</button>
-        <button class="filter-chip" data-filter="hidden" onclick="setFilter(this)">🥚 Hidden</button>
-        <button class="filter-chip" data-filter="found" onclick="setFilter(this)">✅ Found</button>
+        <button class="fchip active" data-filter="all" onclick="setAdminFilter(this)">All</button>
+        <button class="fchip" data-filter="hidden" onclick="setAdminFilter(this)">🥚 Hidden</button>
+        <button class="fchip" data-filter="found" onclick="setAdminFilter(this)">✅ Found</button>
       </div>
       <div class="egg-list" id="egg-list"></div>
     </div>
-
-    <!-- MAP -->
-    <div class="view" id="view-map">
-      <div class="map-view-wrap">
-        <div class="map-container">
-          <div class="map-header">
-            <div class="map-title">🗺️ Egg Hunt Map</div>
-            <div class="map-sub" id="map-sub">Tap an egg below to navigate</div>
+    <!-- MAP TAB -->
+    <div class="aview" id="aview-map">
+      <div class="map-wrap">
+        <div class="map-box">
+          <div class="map-hdr">
+            <div class="map-hdr-title">🗺️ Egg Map</div>
+            <div class="map-hdr-sub" id="map-sub">No eggs yet</div>
           </div>
           <iframe id="map-frame" src="about:blank"></iframe>
           <div class="map-legend">
             <div class="legend-item"><div class="legend-dot" style="background:#f5c842;border:2px solid #888;"></div>Hidden</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#4caf50;border:2px solid #2e7d32;"></div>Found</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#22c55e;border:2px solid #166534;"></div>Found</div>
           </div>
         </div>
       </div>
@@ -363,56 +639,83 @@
   </div>
 </div>
 
-<!-- ===== HUNTER VIEW ===== -->
-<div id="hunter-wrap" class="hunter-wrap" style="display:none;">
-  <div class="hunter-header">
-    <div class="hunter-header-top">
-      <div class="hunter-title">🏃 Egg Hunt!</div>
-      <div class="hunter-stats">
-        <div class="hunter-chip" id="h-stat-total">🥚 0</div>
-        <div class="hunter-chip found-chip" id="h-stat-found">✅ 0</div>
-        <button class="logout-btn" style="color:rgba(255,255,255,0.4);" onclick="goSplash()">Exit</button>
+<!-- HUNTER -->
+<div id="hunter-wrap">
+  <div class="h-header">
+    <div class="h-header-top">
+      <div class="h-title">🏃 Egg Hunt</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="h-prize-pill" id="h-unclaimed">💰 $0 left</div>
+        <button class="h-exit" onclick="goSplash()">Exit</button>
       </div>
     </div>
-    <div class="hunter-tabs">
-      <button class="hunter-tab active" onclick="switchHunterTab('map')">🗺️ Map</button>
-      <button class="hunter-tab" onclick="switchHunterTab('list')">📋 Eggs</button>
+    <div class="h-stats-row">
+      <div class="h-stat"><span>Total</span><span class="val" id="h-total">0</span></div>
+      <div class="h-stat green"><span>Found</span><span class="val" id="h-found">0</span></div>
+      <div class="h-stat"><span>Remaining</span><span class="val" id="h-remaining">0</span></div>
+    </div>
+    <div class="h-tabs">
+      <button class="h-tab active" onclick="switchHunterTab('map')">🗺️ Map</button>
+      <button class="h-tab" onclick="switchHunterTab('list')">📋 Eggs</button>
     </div>
   </div>
 
-  <!-- HUNTER MAP TAB -->
-  <div class="hunter-view active" id="hview-map">
-    <div class="hunter-map-wrap">
-      <div class="hunter-map-box">
+  <div class="h-view active" id="hview-map">
+    <div class="h-map-wrap">
+      <div class="h-map-box">
         <iframe id="hunter-map-frame" src="about:blank"></iframe>
-        <div class="hunter-legend">
-          <div class="hunter-legend-item"><div class="legend-dot" style="background:#f5c842;border:2px solid #888;"></div>Not Found</div>
-          <div class="hunter-legend-item"><div class="legend-dot" style="background:#4caf50;border:2px solid #2e7d32;"></div>Found!</div>
+        <div class="h-map-legend">
+          <div class="h-legend-item"><div class="legend-dot" style="background:#f5c842;border:2px solid #888;width:10px;height:10px;border-radius:50%;"></div>Not Found</div>
+          <div class="h-legend-item"><div class="legend-dot" style="background:#22c55e;border:2px solid #166534;width:10px;height:10px;border-radius:50%;"></div>Found</div>
         </div>
       </div>
     </div>
+    <!-- Eggs listed below map -->
+    <div class="h-egg-section">
+      <div class="h-section-label">All Eggs</div>
+      <div class="h-filter-row">
+        <button class="h-filter active" data-filter="all" onclick="setHunterFilter(this,'map')">All</button>
+        <button class="h-filter" data-filter="hidden" onclick="setHunterFilter(this,'map')">🥚 Not Found</button>
+        <button class="h-filter" data-filter="found" onclick="setHunterFilter(this,'map')">✅ Found</button>
+      </div>
+      <div class="h-egg-grid" id="h-egg-grid-map"></div>
+    </div>
   </div>
 
-  <!-- HUNTER LIST TAB -->
-  <div class="hunter-view" id="hview-list">
-    <div class="hunter-controls">
-      <button class="hunter-filter active" data-filter="all" onclick="setHunterFilter(this)">All</button>
-      <button class="hunter-filter" data-filter="hidden" onclick="setHunterFilter(this)">🥚 Not Found</button>
-      <button class="hunter-filter" data-filter="found" onclick="setHunterFilter(this)">✅ Found</button>
+  <div class="h-view" id="hview-list">
+    <div class="h-egg-section" style="padding-top:16px;">
+      <div class="h-filter-row">
+        <button class="h-filter active" data-filter="all" onclick="setHunterFilter(this,'list')">All</button>
+        <button class="h-filter" data-filter="hidden" onclick="setHunterFilter(this,'list')">🥚 Not Found</button>
+        <button class="h-filter" data-filter="found" onclick="setHunterFilter(this,'list')">✅ Found</button>
+      </div>
+      <div class="h-egg-grid" id="h-egg-grid-list"></div>
     </div>
-    <div class="hunter-list" id="hunter-list"></div>
   </div>
 </div>
 
 <!-- PHOTO MODAL -->
 <div class="modal-overlay" id="photo-modal">
   <div class="modal-box">
-    <img id="modal-photo" src="" alt="Egg photo">
+    <img id="modal-photo" src="" alt="">
     <div class="modal-title" id="modal-name"></div>
     <div class="modal-detail" id="modal-coords"></div>
     <div class="modal-detail" id="modal-note"></div>
     <div class="modal-detail" id="modal-money"></div>
     <button class="modal-close" id="modal-close-btn">Close</button>
+  </div>
+</div>
+
+<!-- CELEBRATION -->
+<div class="celebration-overlay" id="celebration-overlay">
+  <div class="celebration-content">
+    <div class="celebration-card" id="celebration-card">
+      <span class="celeb-emoji">🎉</span>
+      <div class="celeb-label">You Found</div>
+      <div class="celeb-amount" id="celeb-amount">$0</div>
+      <div class="celeb-sub" id="celeb-sub">Egg #1</div>
+      <button class="celeb-close" onclick="closeCelebration()">Awesome! 🎊</button>
+    </div>
   </div>
 </div>
 
@@ -436,109 +739,79 @@ const db = getFirestore(fbApp);
 const EGG_DOC = doc(db, 'hunts', 'main');
 const ADMIN_PIN = '2025';
 
-// ===== STATE =====
 let eggs = [];
-let currentMode = null; // 'admin' | 'hunter'
+let currentMode = null;
 let currentLat = null, currentLng = null, currentAccuracy = null;
 let currentPhoto = null;
 let selectedColor = '#f5c842';
-let currentFilter = 'all';
-let hunterFilter = 'all';
+let adminFilter = 'all';
+let hunterFilterMap = 'all';
+let hunterFilterList = 'all';
 let lastSavedJSON = '';
 let eggCounter = 0;
-
-// ===== PIN STATE =====
 let pinEntry = '';
 
-// ===== SPLASH =====
+// ===== NAVIGATION =====
 function goSplash() {
   document.getElementById('splash').classList.remove('hidden');
   document.getElementById('pin-screen').classList.add('hidden');
   document.getElementById('admin-wrap').style.display = 'none';
   document.getElementById('hunter-wrap').style.display = 'none';
-  currentMode = null;
-  pinEntry = '';
-  updatePinDots();
+  currentMode = null; pinEntry = ''; updatePinDots();
 }
-
 function goHider() {
   document.getElementById('splash').classList.add('hidden');
   document.getElementById('pin-screen').classList.remove('hidden');
-  pinEntry = '';
-  updatePinDots();
+  pinEntry = ''; updatePinDots();
   document.getElementById('pin-error').textContent = '';
 }
-
 function goHunter() {
   document.getElementById('splash').classList.add('hidden');
   currentMode = 'hunter';
   document.getElementById('hunter-wrap').style.display = 'flex';
-  renderHunterMap();
-  renderHunterList();
+  renderHunterAll();
+}
+function goAdmin() {
+  document.getElementById('pin-screen').classList.add('hidden');
+  document.getElementById('admin-wrap').style.display = 'block';
+  currentMode = 'admin';
+  renderAdminAll();
 }
 
 // ===== PIN =====
-function pinKey(digit) {
+function pinKey(d) {
   if (pinEntry.length >= 4) return;
-  pinEntry += digit;
-  updatePinDots();
-  if (pinEntry.length === 4) {
-    setTimeout(checkPin, 150);
-  }
+  pinEntry += d; updatePinDots();
+  if (pinEntry.length === 4) setTimeout(checkPin, 150);
 }
-
-function pinDel() {
-  pinEntry = pinEntry.slice(0, -1);
-  updatePinDots();
-  document.getElementById('pin-error').textContent = '';
-}
-
+function pinDel() { pinEntry = pinEntry.slice(0,-1); updatePinDots(); document.getElementById('pin-error').textContent = ''; }
 function updatePinDots() {
-  for (let i = 0; i < 4; i++) {
-    document.getElementById('pd' + i).className = 'pin-dot' + (i < pinEntry.length ? ' filled' : '');
-  }
+  for (let i=0;i<4;i++) document.getElementById('pd'+i).className='pin-dot'+(i<pinEntry.length?' filled':'');
 }
-
 function checkPin() {
-  if (pinEntry === ADMIN_PIN) {
-    document.getElementById('pin-screen').classList.add('hidden');
-    document.getElementById('admin-wrap').style.display = 'block';
-    currentMode = 'admin';
-    renderAll();
-  } else {
-    document.getElementById('pin-error').textContent = '❌ Wrong PIN, try again';
-    pinEntry = '';
-    updatePinDots();
-  }
+  if (pinEntry === ADMIN_PIN) { goAdmin(); }
+  else { document.getElementById('pin-error').textContent = '❌ WRONG PIN — TRY AGAIN'; pinEntry=''; updatePinDots(); }
 }
 
 // ===== FIREBASE =====
 function startSync() {
   updateSyncDot('syncing');
-  onSnapshot(EGG_DOC, (snapshot) => {
-    if (snapshot.exists()) {
-      const rawEggs = snapshot.data().eggs || [];
-      eggCounter = snapshot.data().counter || rawEggs.length;
-      const incoming = mergePhotos(rawEggs);
-      const incomingJSON = JSON.stringify(rawEggs);
+  onSnapshot(EGG_DOC, (snap) => {
+    if (snap.exists()) {
+      const raw = snap.data().eggs || [];
+      eggCounter = snap.data().counter || raw.length;
+      const incoming = mergePhotos(raw);
+      const incomingJSON = JSON.stringify(raw);
       if (incomingJSON !== lastSavedJSON) {
         const wasEmpty = eggs.length === 0;
-        eggs = incoming;
-        lastSavedJSON = incomingJSON;
-        if (currentMode === 'admin') renderAll();
-        if (currentMode === 'hunter') { renderHunterList(); renderHunterMap(); }
+        eggs = incoming; lastSavedJSON = incomingJSON;
+        if (currentMode === 'admin') renderAdminAll();
+        if (currentMode === 'hunter') renderHunterAll();
         if (!wasEmpty) showToast('🔄 Eggs updated!');
       }
-    } else {
-      eggs = [];
-      if (currentMode === 'admin') renderAll();
-      if (currentMode === 'hunter') { renderHunterList(); renderHunterMap(); }
-    }
+    } else { eggs = []; if (currentMode==='admin') renderAdminAll(); if (currentMode==='hunter') renderHunterAll(); }
     updateSyncDot('ok');
-  }, (err) => {
-    updateSyncDot('error');
-    showToast('⚠️ Connection issue.');
-  });
+  }, () => { updateSyncDot('error'); showToast('⚠️ Connection issue.'); });
 }
 
 async function saveEggs() {
@@ -546,362 +819,303 @@ async function saveEggs() {
     updateSyncDot('syncing');
     const photoMap = {};
     eggs.forEach(e => { if (e.photo) photoMap[e.id] = e.photo; });
-    try { localStorage.setItem('egg-photos', JSON.stringify(photoMap)); } catch(le) {}
-    const eggsNoPhotos = eggs.map(({photo, ...rest}) => rest);
-    const json = JSON.stringify(eggsNoPhotos);
-    await setDoc(EGG_DOC, { eggs: eggsNoPhotos, counter: eggCounter, updatedAt: new Date().toISOString() });
-    lastSavedJSON = json;
-    updateSyncDot('ok');
-  } catch (e) {
-    updateSyncDot('error');
-    showToast('⚠️ Could not save.');
-  }
+    try { localStorage.setItem('egg-photos', JSON.stringify(photoMap)); } catch(e) {}
+    const clean = eggs.map(({photo,...r})=>r);
+    const json = JSON.stringify(clean);
+    await setDoc(EGG_DOC, { eggs: clean, counter: eggCounter, updatedAt: new Date().toISOString() });
+    lastSavedJSON = json; updateSyncDot('ok');
+  } catch(e) { updateSyncDot('error'); showToast('⚠️ Save failed.'); }
 }
 
-function mergePhotos(incomingEggs) {
-  try {
-    const photoMap = JSON.parse(localStorage.getItem('egg-photos') || '{}');
-    return incomingEggs.map(e => ({ ...e, photo: photoMap[e.id] || null }));
-  } catch { return incomingEggs; }
+function mergePhotos(list) {
+  try { const m=JSON.parse(localStorage.getItem('egg-photos')||'{}'); return list.map(e=>({...e,photo:m[e.id]||null})); }
+  catch { return list; }
 }
-
-function updateSyncDot(status) {
-  const dot = document.getElementById('sync-dot');
-  if (dot) dot.className = 'sync-dot ' + status;
-}
+function updateSyncDot(s) { const d=document.getElementById('sync-dot'); if(d) d.className='sync-dot '+s; }
 
 // ===== ADMIN TABS =====
-function switchTab(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(b => {
-    if (b.textContent.includes(name === 'add' ? 'Hide' : name === 'list' ? 'List' : 'Map')) b.classList.add('active');
-  });
-  if (name === 'map') renderAdminMap();
-  if (name === 'list') renderList();
+function switchAdminTab(name) {
+  document.querySelectorAll('.aview').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('aview-'+name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (name==='map') renderAdminMap();
+  if (name==='list') renderAdminList();
 }
 
 // ===== GPS =====
 function lockLocation() {
-  const btn = document.getElementById('gps-btn');
-  const icon = document.getElementById('gps-btn-icon');
-  const text = document.getElementById('gps-btn-text');
-  const display = document.getElementById('coords-display');
-  btn.classList.add('loading'); icon.textContent = '⏳'; text.textContent = 'Getting GPS…';
+  const btn=document.getElementById('gps-btn'),icon=document.getElementById('gps-icon'),text=document.getElementById('gps-text'),disp=document.getElementById('coords-display');
+  btn.classList.add('loading'); icon.textContent='⏳'; text.textContent='Getting GPS…';
   navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      currentLat = pos.coords.latitude; currentLng = pos.coords.longitude; currentAccuracy = Math.round(pos.coords.accuracy);
-      btn.classList.remove('loading'); btn.classList.add('locked');
-      icon.textContent = '✅'; text.textContent = 'Location Locked!';
-      display.textContent = `📍 ${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}  ±${currentAccuracy}m`;
-      display.classList.add('visible');
-      showToast('📍 Location locked!');
-    },
-    (err) => { btn.classList.remove('loading'); icon.textContent = '⚠️'; text.textContent = 'GPS Failed – Tap to Retry'; showToast('⚠️ GPS failed. Check permissions.'); },
-    { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+    pos => { currentLat=pos.coords.latitude; currentLng=pos.coords.longitude; currentAccuracy=Math.round(pos.coords.accuracy); btn.classList.remove('loading'); btn.classList.add('locked'); icon.textContent='✅'; text.textContent='Location Locked!'; disp.textContent=`📍 ${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}  ±${currentAccuracy}m`; disp.classList.add('visible'); showToast('📍 Location locked!'); },
+    () => { btn.classList.remove('loading'); icon.textContent='⚠️'; text.textContent='GPS Failed – Tap to Retry'; showToast('⚠️ GPS failed. Check permissions.'); },
+    {enableHighAccuracy:true,timeout:12000,maximumAge:0}
   );
 }
 
 // ===== PHOTO =====
 function handlePhoto(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const maxW = 800;
-      const scale = Math.min(1, maxW / img.width);
-      canvas.width = img.width * scale; canvas.height = img.height * scale;
-      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      currentPhoto = canvas.toDataURL('image/jpeg', 0.7);
-      document.getElementById('photo-thumb').src = currentPhoto;
-      document.getElementById('photo-thumb').classList.add('visible');
-      document.getElementById('photo-btn').classList.add('has-photo');
-      document.getElementById('photo-btn-text').textContent = 'Photo Taken ✓';
-      showToast('📸 Photo captured!');
-    };
-    img.src = e.target.result;
-  };
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{ const img=new Image(); img.onload=()=>{ const c=document.createElement('canvas'),s=Math.min(1,800/img.width); c.width=img.width*s; c.height=img.height*s; c.getContext('2d').drawImage(img,0,0,c.width,c.height); currentPhoto=c.toDataURL('image/jpeg',0.7); document.getElementById('photo-thumb').src=currentPhoto; document.getElementById('photo-thumb').classList.add('visible'); document.getElementById('photo-btn').classList.add('has-photo'); document.getElementById('photo-btn-text').textContent='Photo Taken ✓'; showToast('📸 Photo captured!'); }; img.src=e.target.result; };
   reader.readAsDataURL(file);
 }
 
-// ===== COLOR =====
-function selectColor(el) {
-  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedColor = el.dataset.color;
-}
+function selectColor(el) { document.querySelectorAll('.cswatch').forEach(s=>s.classList.remove('selected')); el.classList.add('selected'); selectedColor=el.dataset.color; }
 
 // ===== SAVE EGG =====
 function saveEgg() {
-  const money = parseFloat(document.getElementById('egg-money').value) || 0;
-  const note = document.getElementById('egg-note').value.trim();
-  if (!currentLat) { showToast('⚠️ Please lock your GPS location first!'); return; }
+  const money=parseFloat(document.getElementById('egg-money').value)||0;
+  const note=document.getElementById('egg-note').value.trim();
+  if (!currentLat) { showToast('⚠️ Lock your GPS first!'); return; }
   eggCounter++;
-  const egg = {
-    id: Date.now().toString(),
-    num: eggCounter,
-    money, note,
-    lat: currentLat, lng: currentLng, accuracy: currentAccuracy,
-    color: selectedColor,
-    photo: currentPhoto,
-    found: false,
-    createdAt: new Date().toISOString()
-  };
-  eggs.push(egg);
-  saveEggs();
-  renderAll();
-  resetForm();
+  const egg = { id:Date.now().toString(), num:eggCounter, money, note, lat:currentLat, lng:currentLng, accuracy:currentAccuracy, color:selectedColor, photo:currentPhoto, found:false, createdAt:new Date().toISOString() };
+  eggs.push(egg); saveEggs(); renderAdminAll(); resetForm();
   showToast(`🥚 Egg #${eggCounter} hidden! $${money.toFixed(2)} inside.`);
 }
 
 function resetForm() {
-  document.getElementById('egg-money').value = '';
-  document.getElementById('egg-note').value = '';
-  document.getElementById('coords-display').classList.remove('visible');
-  document.getElementById('coords-display').textContent = '';
-  document.getElementById('gps-btn').classList.remove('locked', 'loading');
-  document.getElementById('gps-btn-icon').textContent = '📡';
-  document.getElementById('gps-btn-text').textContent = 'Lock My Location';
-  document.getElementById('photo-thumb').classList.remove('visible');
-  document.getElementById('photo-btn').classList.remove('has-photo');
-  document.getElementById('photo-btn-text').textContent = 'Take Photo';
-  document.getElementById('camera-input').value = '';
-  currentLat = null; currentLng = null; currentPhoto = null;
-  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-  document.querySelector('.color-swatch').classList.add('selected');
-  selectedColor = '#f5c842';
+  document.getElementById('egg-money').value=''; document.getElementById('egg-note').value='';
+  document.getElementById('coords-display').classList.remove('visible'); document.getElementById('coords-display').textContent='';
+  document.getElementById('gps-btn').classList.remove('locked','loading'); document.getElementById('gps-icon').textContent='📡'; document.getElementById('gps-text').textContent='Lock My Location';
+  document.getElementById('photo-thumb').classList.remove('visible'); document.getElementById('photo-btn').classList.remove('has-photo'); document.getElementById('photo-btn-text').textContent='Take Photo';
+  document.getElementById('camera-input').value=''; currentLat=null; currentLng=null; currentPhoto=null;
+  document.querySelectorAll('.cswatch').forEach(s=>s.classList.remove('selected')); document.querySelector('.cswatch').classList.add('selected'); selectedColor='#f5c842';
 }
 
-// ===== MARK FOUND / UNFOUND =====
-function markFound(id) {
-  const egg = eggs.find(e => e.id === id);
-  if (egg) { egg.found = true; egg.foundAt = new Date().toISOString(); saveEggs(); renderAll(); showToast(`🎉 Egg #${egg.num} found! $${egg.money.toFixed(2)} collected!`); }
-}
-function markUnfound(id) {
-  const egg = eggs.find(e => e.id === id);
-  if (egg) { egg.found = false; egg.foundAt = null; saveEggs(); renderAll(); showToast(`🥚 Egg #${egg.num} marked hidden again.`); }
-}
-function deleteEgg(id) {
-  const egg = eggs.find(e => e.id === id);
-  if (!egg) return;
-  if (!confirm(`Delete Egg #${egg.num}? This cannot be undone.`)) return;
-  eggs = eggs.filter(e => e.id !== id);
-  saveEggs(); renderAll();
-  showToast(`🗑️ Egg #${egg.num} deleted.`);
+// ===== CLEAR ALL =====
+function clearAllEggs() {
+  if (!confirm('⚠️ Delete ALL eggs and start over? This cannot be undone.')) return;
+  eggs=[]; eggCounter=0; lastSavedJSON='';
+  try { localStorage.removeItem('egg-photos'); } catch(e) {}
+  saveEggs(); renderAdminAll(); showToast('🗑️ All eggs cleared!');
 }
 
-// ===== NAVIGATE =====
-function navigateTo(lat, lng) {
-  window.open(`https://maps.apple.com/?daddr=${lat},${lng}&dirflg=w&t=m`, '_blank');
-}
-
-// ===== FILTER =====
-function setFilter(el) {
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  currentFilter = el.dataset.filter;
-  renderList();
-}
+// ===== ADMIN FOUND/UNFOUND/DELETE =====
+function adminMarkFound(id) { const e=eggs.find(x=>x.id===id); if(e){e.found=true;e.foundAt=new Date().toISOString();saveEggs();renderAdminAll();showToast(`✅ Egg #${e.num} found!`);} }
+function adminMarkUnfound(id) { const e=eggs.find(x=>x.id===id); if(e){e.found=false;e.foundAt=null;saveEggs();renderAdminAll();showToast(`↩️ Egg #${e.num} rehidden.`);} }
+function deleteEgg(id) { const e=eggs.find(x=>x.id===id); if(!e) return; if(!confirm(`Delete Egg #${e.num}?`)) return; eggs=eggs.filter(x=>x.id!==id); saveEggs(); renderAdminAll(); showToast(`🗑️ Egg #${e.num} deleted.`); }
+function setAdminFilter(el) { document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); adminFilter=el.dataset.filter; renderAdminList(); }
 
 // ===== ADMIN RENDER =====
-function renderAll() {
-  updateStats(); renderList();
+function renderAdminAll() { updateAdminStats(); renderAdminList(); }
+function updateAdminStats() {
+  const total=eggs.length, found=eggs.filter(e=>e.found).length, money=eggs.reduce((s,e)=>s+(e.money||0),0);
+  document.getElementById('stat-total').textContent=`🥚 ${total}`;
+  document.getElementById('stat-found').textContent=`✓ ${found}`;
+  document.getElementById('stat-money').textContent=`$${money.toFixed(0)}`;
 }
 
-function updateStats() {
-  const total = eggs.length, found = eggs.filter(e => e.found).length;
-  const money = eggs.reduce((s, e) => s + (e.money || 0), 0);
-  document.getElementById('stat-total').textContent = `🥚 ${total}`;
-  document.getElementById('stat-found').textContent = `✓ ${found}`;
-  document.getElementById('stat-money').textContent = `$${money.toFixed(2)}`;
-}
-
-function renderList() {
-  const container = document.getElementById('egg-list');
-  let filtered = eggs;
-  if (currentFilter === 'hidden') filtered = eggs.filter(e => !e.found);
-  if (currentFilter === 'found') filtered = eggs.filter(e => e.found);
-  if (filtered.length === 0) {
-    container.innerHTML = `<div class="empty-state"><span class="empty-icon">🌿</span><div class="empty-title">${currentFilter === 'found' ? 'No eggs found yet!' : 'No eggs here!'}</div><div class="empty-sub">${currentFilter === 'all' ? 'Go hide some eggs!' : 'Change the filter above.'}</div></div>`;
-    return;
-  }
-  container.innerHTML = filtered.map(egg => `
-    <div class="egg-card ${egg.found ? 'is-found' : ''}">
+function renderAdminList() {
+  const container=document.getElementById('egg-list');
+  let filtered=eggs;
+  if(adminFilter==='hidden') filtered=eggs.filter(e=>!e.found);
+  if(adminFilter==='found') filtered=eggs.filter(e=>e.found);
+  if(filtered.length===0){container.innerHTML=`<div class="a-empty"><span class="a-empty-icon">🌿</span><div class="a-empty-title">No eggs here</div></div>`;return;}
+  container.innerHTML=filtered.map(egg=>`
+    <div class="egg-card ${egg.found?'is-found':''}">
       <div class="egg-card-inner">
         <div class="egg-color-bar" style="background:${egg.color}"></div>
         <div class="egg-card-body">
           <div class="egg-card-top">
-            <div class="egg-name">Egg #${egg.num || '?'}</div>
-            ${egg.money > 0 ? `<div class="egg-money">$${egg.money.toFixed(2)}</div>` : ''}
+            <div class="egg-num">Egg #${egg.num||'?'}</div>
+            ${egg.money>0?`<div class="egg-money-tag">$${egg.money.toFixed(2)}</div>`:''}
           </div>
-          ${egg.lat ? `<div class="egg-coords">📍 ${egg.lat.toFixed(5)}, ${egg.lng.toFixed(5)}${egg.accuracy ? ` ±${egg.accuracy}m` : ''}</div>` : ''}
-          ${egg.note ? `<div class="egg-note">📝 ${escHtml(egg.note)}</div>` : ''}
-          ${egg.found ? `<div class="found-badge">✅ Found ${egg.foundAt ? formatTime(egg.foundAt) : ''}</div>` : ''}
-          <div class="egg-card-actions">
-            ${!egg.found ? `<button class="egg-action-btn btn-found" onclick="markFound('${egg.id}')">✅ Found!</button>` : `<button class="egg-action-btn btn-unfound" onclick="markUnfound('${egg.id}')">↩️ Rehide</button>`}
-            ${egg.lat ? `<button class="egg-action-btn btn-nav" onclick="navigateTo(${egg.lat},${egg.lng})">🧭 Nav</button>` : ''}
-            ${egg.photo ? `<button class="egg-action-btn btn-photo-view" onclick="showPhoto('${egg.id}')">📷</button>` : ''}
-            <button class="egg-action-btn btn-delete" onclick="deleteEgg('${egg.id}')">🗑️</button>
+          ${egg.lat?`<div class="egg-coords">📍 ${egg.lat.toFixed(5)}, ${egg.lng.toFixed(5)}${egg.accuracy?` ±${egg.accuracy}m`:''}</div>`:''}
+          ${egg.note?`<div class="egg-note">📝 ${escHtml(egg.note)}</div>`:''}
+          ${egg.found?`<div class="found-badge">✅ Found ${egg.foundAt?formatTime(egg.foundAt):''}</div>`:''}
+          <div class="egg-actions">
+            ${!egg.found?`<button class="eabtn btn-found" onclick="adminMarkFound('${egg.id}')">✅ Found</button>`:`<button class="eabtn btn-unfound" onclick="adminMarkUnfound('${egg.id}')">↩️ Rehide</button>`}
+            ${egg.lat?`<button class="eabtn btn-nav" onclick="navTo(${egg.lat},${egg.lng})">🧭 Nav</button>`:''}
+            ${egg.photo?`<button class="eabtn btn-photo" onclick="showPhoto('${egg.id}')">📷</button>`:''}
+            <button class="eabtn btn-delete" onclick="deleteEgg('${egg.id}')">🗑️</button>
           </div>
         </div>
-        ${egg.photo ? `<div class="egg-photo-thumb"><img src="${egg.photo}" alt="photo" onclick="showPhoto('${egg.id}')"></div>` : ''}
+        ${egg.photo?`<div class="egg-photo-thumb"><img src="${egg.photo}" alt="" onclick="showPhoto('${egg.id}')"></div>`:''}
       </div>
     </div>`).join('');
 }
 
 function buildMapHTML(geoEggs, isAdmin) {
-  const coordCount = {};
-  const markersJS = geoEggs.map(egg => {
-    const color = egg.found ? '#4caf50' : (egg.color || '#f5c842');
-    const key = egg.lat.toFixed(4) + ',' + egg.lng.toFixed(4);
-    coordCount[key] = (coordCount[key] || 0) + 1;
-    const n = coordCount[key];
-    const angle = (n - 1) * 2.4;
-    const radius = n === 1 ? 0 : 0.00008 * Math.ceil((n-1)/6);
-    const lat = egg.lat + radius * Math.cos(angle);
-    const lng = egg.lng + radius * Math.sin(angle);
-    const label = isAdmin ? `Egg #${egg.num || '?'}${egg.money > 0 ? ' — $' + egg.money.toFixed(2) : ''}${egg.note ? '<br><small>' + escHtml(egg.note) + '</small>' : ''}` : `Egg #${egg.num || '?'}`;
-    return `var m${egg.id.slice(-6)}=L.circleMarker([${lat},${lng}],{radius:12,fillColor:"${color}",color:"#fff",weight:2.5,opacity:1,fillOpacity:0.95}).addTo(map);m${egg.id.slice(-6)}.bindPopup('<b>${label}</b>');`;
+  const coordCount={};
+  const markers=geoEggs.map(egg=>{
+    const color=egg.found?'#22c55e':(egg.color||'#f5c842');
+    const key=egg.lat.toFixed(4)+','+egg.lng.toFixed(4);
+    coordCount[key]=(coordCount[key]||0)+1;
+    const n=coordCount[key],angle=(n-1)*2.4,radius=n===1?0:0.00008*Math.ceil((n-1)/6);
+    const lat=egg.lat+radius*Math.cos(angle),lng=egg.lng+radius*Math.sin(angle);
+    const popup=isAdmin?`Egg #${egg.num||'?'}${egg.money>0?' — $'+egg.money.toFixed(2):''}${egg.note?'<br><small>'+escHtml(egg.note)+'</small>':''}`:`<b>Egg #${egg.num||'?'}</b>${egg.found?'<br><span style="color:#22c55e">✅ Found!</span>':'<br><span style="color:#fbbf24">🥚 Not Found Yet</span>'}`;
+    return `var m${egg.id.slice(-6)}=L.circleMarker([${lat},${lng}],{radius:13,fillColor:"${color}",color:"#fff",weight:2.5,opacity:1,fillOpacity:0.95}).addTo(map);m${egg.id.slice(-6)}.bindPopup('${popup}');`;
   }).join('\n');
-  const avgLat = geoEggs.reduce((s, e) => s + e.lat, 0) / geoEggs.length;
-  const avgLng = geoEggs.reduce((s, e) => s + e.lng, 0) / geoEggs.length;
-  return `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script><style>body,html{margin:0;padding:0;}#map{width:100%;height:100vh;}</style></head><body><div id="map"></div><script>var map=L.map('map',{zoomControl:true}).setView([${avgLat},${avgLng}],17);L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri',maxZoom:19}).addTo(map);${markersJS}var g=L.featureGroup([${geoEggs.map(e=>`L.circleMarker([${e.lat},${e.lng}],{radius:1})`).join(',')}]);map.fitBounds(g.getBounds().pad(0.2));<\/script></body></html>`;
+  const avgLat=geoEggs.reduce((s,e)=>s+e.lat,0)/geoEggs.length;
+  const avgLng=geoEggs.reduce((s,e)=>s+e.lng,0)/geoEggs.length;
+  return `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script><style>body,html{margin:0;padding:0;}#map{width:100%;height:100vh;}</style></head><body><div id="map"></div><script>var map=L.map('map',{zoomControl:true}).setView([${avgLat},${avgLng}],17);L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri',maxZoom:19}).addTo(map);${markers}var g=L.featureGroup([${geoEggs.map(e=>`L.circleMarker([${e.lat},${e.lng}],{radius:1})`).join(',')}]);map.fitBounds(g.getBounds().pad(0.2));<\/script></body></html>`;
 }
 
 function renderAdminMap() {
-  const geoEggs = eggs.filter(e => e.lat);
-  document.getElementById('map-sub').textContent = geoEggs.length > 0 ? `${geoEggs.length} eggs on map` : 'No GPS eggs yet';
-  if (geoEggs.length === 0) { document.getElementById('map-frame').src = 'about:blank'; document.getElementById('map-egg-list').innerHTML = ''; return; }
-  document.getElementById('map-frame').srcdoc = buildMapHTML(geoEggs, true);
-  document.getElementById('map-egg-list').innerHTML = geoEggs.map(egg => `
+  const geo=eggs.filter(e=>e.lat);
+  document.getElementById('map-sub').textContent=geo.length>0?`${geo.length} eggs on map`:'No GPS eggs yet';
+  if(!geo.length){document.getElementById('map-frame').src='about:blank';document.getElementById('map-egg-list').innerHTML='';return;}
+  document.getElementById('map-frame').srcdoc=buildMapHTML(geo,true);
+  document.getElementById('map-egg-list').innerHTML=geo.map(egg=>`
     <div class="map-egg-row">
-      <div class="map-egg-dot" style="background:${egg.found ? '#4caf50' : egg.color}"></div>
+      <div class="map-egg-dot" style="background:${egg.found?'#22c55e':egg.color}"></div>
       <div class="map-egg-info">
-        <div class="map-egg-name">Egg #${egg.num || '?'}${egg.money > 0 ? ` — $${egg.money.toFixed(2)}` : ''}</div>
+        <div class="map-egg-name">Egg #${egg.num||'?'}${egg.money>0?` — $${egg.money.toFixed(2)}`:''}</div>
         <div class="map-egg-coord">${egg.lat.toFixed(5)}, ${egg.lng.toFixed(5)}</div>
       </div>
-      <button class="map-nav-btn" onclick="navigateTo(${egg.lat},${egg.lng})">🧭 Nav</button>
+      <button class="map-nav-btn" onclick="navTo(${egg.lat},${egg.lng})">🧭 Nav</button>
     </div>`).join('');
 }
 
 // ===== PHOTO MODAL =====
 function showPhoto(id) {
-  const egg = eggs.find(e => e.id === id);
-  if (!egg || !egg.photo) return;
-  document.getElementById('modal-photo').src = egg.photo;
-  document.getElementById('modal-name').textContent = `🥚 Egg #${egg.num || '?'}`;
-  document.getElementById('modal-coords').textContent = egg.lat ? `📍 ${egg.lat.toFixed(6)}, ${egg.lng.toFixed(6)}` : '';
-  document.getElementById('modal-note').textContent = egg.note ? `📝 ${egg.note}` : '';
-  document.getElementById('modal-money').textContent = egg.money > 0 ? `💰 $${egg.money.toFixed(2)} inside` : '';
+  const egg=eggs.find(e=>e.id===id); if(!egg||!egg.photo) return;
+  document.getElementById('modal-photo').src=egg.photo;
+  document.getElementById('modal-name').textContent=`🥚 Egg #${egg.num||'?'}`;
+  document.getElementById('modal-coords').textContent=egg.lat?`📍 ${egg.lat.toFixed(6)}, ${egg.lng.toFixed(6)}`:'';
+  document.getElementById('modal-note').textContent=egg.note?`📝 ${egg.note}`:'';
+  document.getElementById('modal-money').textContent=egg.money>0?`💰 $${egg.money.toFixed(2)} inside`:'';
   document.getElementById('photo-modal').classList.add('open');
 }
-
-function closeModal() {
-  document.getElementById('photo-modal').classList.remove('open');
-}
-
-// Close button event listener (fixes the broken close button issue)
+function closeModal() { document.getElementById('photo-modal').classList.remove('open'); }
 document.getElementById('modal-close-btn').addEventListener('click', closeModal);
 
-// ===== HUNTER VIEW =====
+// ===== HUNTER =====
 function switchHunterTab(name) {
-  document.querySelectorAll('.hunter-view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.hunter-tab').forEach(b => b.classList.remove('active'));
-  document.getElementById('hview-' + name).classList.add('active');
-  document.querySelectorAll('.hunter-tab').forEach(b => {
-    if (b.textContent.includes(name === 'map' ? 'Map' : 'Eggs')) b.classList.add('active');
-  });
-  if (name === 'map') renderHunterMap();
-  if (name === 'list') renderHunterList();
+  document.querySelectorAll('.h-view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.h-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('hview-'+name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(name==='map') renderHunterMap();
+  if(name==='list') renderHunterEggGrid('list');
 }
 
-function setHunterFilter(el) {
-  document.querySelectorAll('.hunter-filter').forEach(c => c.classList.remove('active'));
+function setHunterFilter(el, context) {
+  const row=el.closest('.h-filter-row');
+  row.querySelectorAll('.h-filter').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
-  hunterFilter = el.dataset.filter;
-  renderHunterList();
+  if(context==='map') { hunterFilterMap=el.dataset.filter; renderHunterEggGrid('map'); }
+  else { hunterFilterList=el.dataset.filter; renderHunterEggGrid('list'); }
 }
 
-function renderHunterList() {
-  const container = document.getElementById('hunter-list');
-  let filtered = eggs;
-  if (hunterFilter === 'hidden') filtered = eggs.filter(e => !e.found);
-  if (hunterFilter === 'found') filtered = eggs.filter(e => e.found);
-  // Update hunter stats
-  const total = eggs.length, found = eggs.filter(e => e.found).length;
-  document.getElementById('h-stat-total').textContent = `🥚 ${total}`;
-  document.getElementById('h-stat-found').textContent = `✅ ${found}`;
-  if (filtered.length === 0) {
-    container.innerHTML = `<div class="hunter-empty"><span class="hunter-empty-icon">${hunterFilter === 'found' ? '🎉' : '🌿'}</span><div class="hunter-empty-title">${hunterFilter === 'found' ? 'None found yet — keep hunting!' : 'All eggs found!'}</div></div>`;
-    return;
-  }
-  container.innerHTML = filtered.map(egg => `
-    <div class="hunter-egg-card ${egg.found ? 'is-found' : ''}">
-      <div class="hunter-egg-inner">
-        <div class="hunter-color-bar" style="background:${egg.color}"></div>
-        <div class="hunter-egg-body">
-          <div class="hunter-egg-top">
-            <div class="hunter-egg-label">🥚 Egg #${egg.num || '?'}</div>
-            ${egg.found ? `<div class="hunter-found-badge">✅ Found!</div>` : ''}
+function renderHunterAll() { updateHunterStats(); renderHunterMap(); renderHunterEggGrid('map'); renderHunterEggGrid('list'); }
+
+function updateHunterStats() {
+  const total=eggs.length, found=eggs.filter(e=>e.found).length;
+  const unclaimed=eggs.filter(e=>!e.found).reduce((s,e)=>s+(e.money||0),0);
+  document.getElementById('h-total').textContent=total;
+  document.getElementById('h-found').textContent=found;
+  document.getElementById('h-remaining').textContent=total-found;
+  document.getElementById('h-unclaimed').textContent=`💰 $${unclaimed.toFixed(0)} left`;
+}
+
+function renderHunterMap() {
+  const geo=eggs.filter(e=>e.lat);
+  updateHunterStats();
+  if(!geo.length){document.getElementById('hunter-map-frame').src='about:blank';return;}
+  document.getElementById('hunter-map-frame').srcdoc=buildMapHTML(geo,false);
+}
+
+function renderHunterEggGrid(context) {
+  const filter=context==='map'?hunterFilterMap:hunterFilterList;
+  const containerId=context==='map'?'h-egg-grid-map':'h-egg-grid-list';
+  const container=document.getElementById(containerId);
+  let filtered=eggs;
+  if(filter==='hidden') filtered=eggs.filter(e=>!e.found);
+  if(filter==='found') filtered=eggs.filter(e=>e.found);
+  if(!filtered.length){container.innerHTML=`<div class="h-empty"><span class="h-empty-icon">${filter==='found'?'🎉':'🌿'}</span><div class="h-empty-title">${filter==='found'?'None found yet!':'All found!'}</div></div>`;return;}
+  container.innerHTML=filtered.map(egg=>`
+    <div class="h-egg-card ${egg.found?'is-found':''}">
+      <div class="h-egg-inner">
+        <div class="h-color-stripe" style="background:${egg.color}"></div>
+        <div class="h-egg-content">
+          <div class="h-egg-top">
+            <div class="h-egg-num">🥚 Egg #${egg.num||'?'}</div>
+            ${egg.found?`<div class="h-found-pill">✅ Found</div>`:''}
           </div>
-          <div class="hunter-egg-actions">
+          <div class="h-egg-btns">
             ${!egg.found
-              ? `<button class="hunter-found-btn not-found" onclick="hunterMarkFound('${egg.id}')">🎉 I Found It!</button>`
-              : `<button class="hunter-found-btn already-found" onclick="hunterMarkUnfound('${egg.id}')">↩️ Mark Not Found</button>`
+              ?`<button class="h-found-btn claim" onclick="hunterClaim('${egg.id}')">🎉 I Found It!</button>`
+              :`<button class="h-found-btn claimed" onclick="hunterUnclaim('${egg.id}')">↩️ Undo</button>`
             }
-            ${egg.lat ? `<button class="hunter-nav-btn" onclick="navigateTo(${egg.lat},${egg.lng})">🧭</button>` : ''}
+            ${egg.lat?`<button class="h-nav-btn" onclick="navTo(${egg.lat},${egg.lng})">🧭</button>`:''}
           </div>
         </div>
       </div>
     </div>`).join('');
 }
 
-function renderHunterMap() {
-  const geoEggs = eggs.filter(e => e.lat);
-  const total = eggs.length, found = eggs.filter(e => e.found).length;
-  document.getElementById('h-stat-total').textContent = `🥚 ${total}`;
-  document.getElementById('h-stat-found').textContent = `✅ ${found}`;
-  if (geoEggs.length === 0) { document.getElementById('hunter-map-frame').src = 'about:blank'; return; }
-  document.getElementById('hunter-map-frame').srcdoc = buildMapHTML(geoEggs, false);
+function hunterClaim(id) {
+  const egg=eggs.find(e=>e.id===id); if(!egg||egg.found) return;
+  egg.found=true; egg.foundAt=new Date().toISOString();
+  saveEggs(); renderHunterAll();
+  launchCelebration(egg);
+}
+function hunterUnclaim(id) {
+  const egg=eggs.find(e=>e.id===id); if(!egg) return;
+  egg.found=false; egg.foundAt=null;
+  saveEggs(); renderHunterAll(); showToast(`↩️ Egg #${egg.num} unmarked.`);
 }
 
-function hunterMarkFound(id) {
-  const egg = eggs.find(e => e.id === id);
-  if (egg) { egg.found = true; egg.foundAt = new Date().toISOString(); saveEggs(); renderHunterList(); renderHunterMap(); showToast(`🎉 Egg #${egg.num} found!`); }
+// ===== CELEBRATION =====
+function launchCelebration(egg) {
+  document.getElementById('celeb-amount').textContent=egg.money>0?`$${egg.money.toFixed(2)}`:'🎊';
+  document.getElementById('celeb-sub').textContent=`Egg #${egg.num||'?'} — Congratulations!`;
+  const overlay=document.getElementById('celebration-overlay');
+  overlay.classList.add('active');
+  // Reset card animation
+  const card=document.getElementById('celebration-card');
+  card.style.animation='none'; void card.offsetWidth;
+  card.style.animation='pop-in 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.2s forwards';
+  spawnConfetti();
+}
+function closeCelebration() {
+  document.getElementById('celebration-overlay').classList.remove('active');
+  document.querySelectorAll('.confetti-piece').forEach(el=>el.remove());
 }
 
-function hunterMarkUnfound(id) {
-  const egg = eggs.find(e => e.id === id);
-  if (egg) { egg.found = false; egg.foundAt = null; saveEggs(); renderHunterList(); renderHunterMap(); showToast(`↩️ Egg #${egg.num} unmarked.`); }
+function spawnConfetti() {
+  const colors=['#c8f135','#f5c842','#f084a0','#7ab8e8','#b07ad4','#ff7043','#ffffff','#22c55e'];
+  const emojis=['💵','💰','🤑','💸'];
+  for(let i=0;i<60;i++){
+    setTimeout(()=>{
+      const piece=document.createElement('div');
+      const isEmoji=Math.random()>0.6;
+      if(isEmoji){
+        piece.style.cssText=`position:fixed;font-size:${20+Math.random()*16}px;left:${Math.random()*100}vw;top:-30px;z-index:5000;animation:confetti-fall ${2+Math.random()*2}s linear forwards;`;
+        piece.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+      } else {
+        piece.className='confetti-piece';
+        piece.style.cssText=`left:${Math.random()*100}vw;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${2+Math.random()*2}s;animation-delay:${Math.random()*0.5}s;width:${6+Math.random()*8}px;height:${10+Math.random()*14}px;`;
+      }
+      document.getElementById('celebration-overlay').appendChild(piece);
+      setTimeout(()=>piece.remove(),5000);
+    },i*30);
+  }
 }
 
-// ===== TOAST =====
+// ===== UTILS =====
+function navTo(lat,lng) { window.open(`https://maps.apple.com/?daddr=${lat},${lng}&dirflg=w&t=m`,'_blank'); }
+function setAdminFilterEvent(el) { setAdminFilter(el); }
 let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
-}
-
-// ===== HELPERS =====
-function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-function formatTime(iso) { const d = new Date(iso); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }
+function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2800); }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function formatTime(iso) { const d=new Date(iso); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }
 
 // ===== EXPOSE GLOBALS =====
-window.goHider = goHider; window.goHunter = goHunter; window.goSplash = goSplash;
-window.pinKey = pinKey; window.pinDel = pinDel;
-window.switchTab = switchTab; window.lockLocation = lockLocation;
-window.handlePhoto = handlePhoto; window.selectColor = selectColor;
-window.saveEgg = saveEgg; window.markFound = markFound; window.markUnfound = markUnfound;
-window.deleteEgg = deleteEgg; window.navigateTo = navigateTo; window.setFilter = setFilter;
-window.showPhoto = showPhoto; window.closeModal = closeModal;
-window.switchHunterTab = switchHunterTab; window.setHunterFilter = setHunterFilter;
-window.hunterMarkFound = hunterMarkFound; window.hunterMarkUnfound = hunterMarkUnfound;
+window.goHider=goHider; window.goHunter=goHunter; window.goSplash=goSplash;
+window.pinKey=pinKey; window.pinDel=pinDel;
+window.switchAdminTab=switchAdminTab; window.lockLocation=lockLocation;
+window.handlePhoto=handlePhoto; window.selectColor=selectColor;
+window.saveEgg=saveEgg; window.clearAllEggs=clearAllEggs;
+window.adminMarkFound=adminMarkFound; window.adminMarkUnfound=adminMarkUnfound;
+window.deleteEgg=deleteEgg; window.navTo=navTo;
+window.setAdminFilter=setAdminFilter; window.showPhoto=showPhoto; window.closeModal=closeModal;
+window.switchHunterTab=switchHunterTab; window.setHunterFilter=setHunterFilter;
+window.hunterClaim=hunterClaim; window.hunterUnclaim=hunterUnclaim;
+window.closeCelebration=closeCelebration;
 
 // ===== INIT =====
 startSync();
