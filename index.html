@@ -29,8 +29,8 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
 .splash-btns{display:flex;flex-direction:column;gap:12px;width:100%;max-width:340px;}
 .splash-btn{width:100%;padding:20px 24px;border:none;border-radius:16px;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:transform 0.12s;-webkit-appearance:none;}
 .splash-btn:active{transform:scale(0.97);}
-.splash-btn.hider{background:var(--lime);color:var(--black);box-shadow:0 8px 32px rgba(200,241,53,0.3);}
-.splash-btn.hunter{background:var(--white);color:var(--black);box-shadow:0 8px 32px rgba(255,255,255,0.1);}
+.splash-btn.hider{background:var(--white);color:var(--black);box-shadow:0 8px 32px rgba(255,255,255,0.1);}
+.splash-btn.hunter{background:var(--lime);color:var(--black);box-shadow:0 8px 32px rgba(200,241,53,0.3);}
 
 /* ── PIN ── */
 .pin-screen{position:fixed;inset:0;z-index:999;background:var(--black);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;}
@@ -224,8 +224,12 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
     <div class="splash-title">Easter<br>Payday</div>
     <div class="splash-sub">Find the eggs. Claim the cash.</div>
     <div class="splash-btns">
-      <button class="splash-btn hider" onclick="goHider()"><span>🧺 Egg Hider</span><span>→</span></button>
-      <button class="splash-btn hunter" onclick="goHunter()"><span>💰 Egg Hunter</span><span>→</span></button>
+      <button class="splash-btn hunter" onclick="goHunter()">
+        <span style="display:flex;align-items:center;gap:10px;"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><circle cx="11" cy="11" r="3"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Egg Hunter</span><span>→</span>
+      </button>
+      <button class="splash-btn hider" onclick="goHider()">
+        <span style="display:flex;align-items:center;gap:10px;"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Egg Hider</span><span>→</span>
+      </button>
     </div>
   </div>
 </div>
@@ -260,7 +264,7 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
 <div id="admin-wrap">
   <div class="app-header">
     <div class="app-header-top">
-      <div class="app-brand"><span class="app-brand-icon">🧺</span>Easter Payday</div>
+      <div class="app-brand"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Easter Payday</div>
       <div class="header-right">
         <div class="sync-dot" id="sync-dot"></div>
         <div class="stat-pill" id="stat-total">🥚 0</div>
@@ -339,8 +343,8 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
     <div class="view" id="aview-list">
       <div class="list-controls">
         <button class="fchip active" data-filter="all" onclick="setAdminFilter(this)">All</button>
-        <button class="fchip" data-filter="hidden" onclick="setAdminFilter(this)">Hidden</button>
-        <button class="fchip" data-filter="found" onclick="setAdminFilter(this)">Found</button>
+        <button class="fchip" data-filter="hidden" onclick="setAdminFilter(this)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Hidden</button>
+        <button class="fchip" data-filter="found" onclick="setAdminFilter(this)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Found</button>
       </div>
       <div class="egg-list" id="egg-list"></div>
     </div>
@@ -367,7 +371,7 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
 <div id="hunter-wrap">
   <div class="app-header">
     <div class="app-header-top">
-      <div class="app-brand"><span class="app-brand-icon">🐰</span>Easter Payday</div>
+      <div class="app-brand"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><circle cx="11" cy="11" r="3"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Easter Payday</div>
       <div class="header-right">
         <div class="stat-pill prize" id="h-unclaimed">💰 $0 left</div>
         <div class="stat-pill green" id="h-won-pill">$0 won</div>
@@ -399,8 +403,8 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
       <div class="h-section-label">Eggs</div>
       <div class="h-filter-row">
         <button class="h-filter active" data-filter="all" onclick="setHunterFilter(this)">All</button>
-        <button class="h-filter" data-filter="hidden" onclick="setHunterFilter(this)">Not Found</button>
-        <button class="h-filter" data-filter="found" onclick="setHunterFilter(this)">Found</button>
+        <button class="h-filter" data-filter="hidden" onclick="setHunterFilter(this)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Not Found</button>
+        <button class="h-filter" data-filter="found" onclick="setHunterFilter(this)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Found</button>
       </div>
       <div class="h-egg-grid" id="h-egg-grid"></div>
     </div>
@@ -427,7 +431,7 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
       <div class="celeb-label" id="celeb-label">You Found</div>
       <div class="celeb-amount" id="celeb-amount">$0</div>
       <div class="celeb-sub" id="celeb-sub">Egg 1</div>
-      <button class="celeb-close" onclick="closeCelebration()">Let's Go! 🎊</button>
+      <button class="celeb-close" onclick="closeCelebration()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><polyline points="20 6 9 17 4 12"/></svg>Let's Go!</button>
     </div>
   </div>
 </div>
@@ -555,7 +559,7 @@ function updateSyncDot(s) { const d=document.getElementById('sync-dot'); if(d) d
 
 // ── ADMIN TABS ──
 function switchAdminTab(name, btn) {
-  document.querySelectorAll('.aview').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('#admin-wrap .view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('#admin-wrap .app-tab').forEach(b=>b.classList.remove('active'));
   document.getElementById('aview-'+name).classList.add('active');
   if(btn) btn.classList.add('active');
@@ -793,9 +797,9 @@ function renderHunterGrid() {
           </div>
           <div class="h-btn-row">
             ${!egg.found
-              ?`<button class="h-found-btn claim" onclick="hunterClaim('${egg.id}')">🎉 I Found It!</button>`
+              ?`<button class="h-found-btn claim" onclick="hunterClaim('${egg.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><polyline points="20 6 9 17 4 12"/></svg>I Found It!</button>`
               :(claimed.includes(egg.id)
-                  ?`<button class="h-undo-btn" onclick="hunterUnclaim('${egg.id}')">↩️ Undo — Wrong Egg?</button>`
+                  ?`<button class="h-undo-btn" onclick="hunterUnclaim('${egg.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3"/></svg>Undo Found Egg</button>`
                   :'')
             }
           </div>
