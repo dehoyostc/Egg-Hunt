@@ -267,8 +267,8 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
       <div class="app-brand"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Easter Payday</div>
       <div class="header-right">
         <div class="sync-dot" id="sync-dot"></div>
-        <div class="stat-pill" id="stat-total">🥚 0</div>
-        <div class="stat-pill green" id="stat-found">✓ 0</div>
+        <div class="stat-pill" id="stat-total"><svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:middle;margin-right:3px'><path d='M12 22C6.5 22 2 17 2 12 2 6.5 6.5 2 12 2s10 4.5 10 10c0 5-4.5 10-10 10z'/></svg>0</div>
+        <div class="stat-pill green" id="stat-found"><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><polyline points="20 6 9 17 4 12"/></svg>0</div>
         <div class="stat-pill prize" id="stat-money">$0</div>
         <button class="exit-btn" onclick="goSplash()">Exit</button>
       </div>
@@ -373,15 +373,15 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
     <div class="app-header-top">
       <div class="app-brand"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><circle cx="11" cy="11" r="3"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Easter Payday</div>
       <div class="header-right">
-        <div class="stat-pill prize" id="h-unclaimed">💰 $0 left</div>
-        <div class="stat-pill green" id="h-won-pill">$0 won</div>
+        <div class="stat-pill prize" id="h-unclaimed"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><path d="M15.5 8H8.5a3.5 3.5 0 0 0 0 7h7"/></svg>$0 left</div>
+        <div class="stat-pill green" id="h-won-pill"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 9a6 6 0 0 0 12 0"/><line x1="12" y1="15" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/><path d="M4 4H2v4a3 3 0 0 0 3 3"/><path d="M20 4h2v4a3 3 0 0 1-3 3"/></svg>$0 won</div>
         <button class="exit-btn" onclick="goSplash()">Exit</button>
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <div class="stat-pill" id="h-total-pill">🥚 0 eggs</div>
-      <div class="stat-pill" id="h-found-pill">✓ 0 found</div>
-      <div class="stat-pill" id="h-left-pill">0 left</div>
+      <div class="stat-pill" id="h-total-pill"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px;"><path d="M12 22C6.5 22 2 17 2 12 2 6.5 6.5 2 12 2s10 4.5 10 10c0 5-4.5 10-10 10z"/></svg>0 eggs</div>
+      <div class="stat-pill" id="h-found-pill"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px;"><polyline points="20 6 9 17 4 12"/></svg>0 found</div>
+      <div class="stat-pill" id="h-left-pill"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px;"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>0 left</div>
     </div>
     <div class="app-tabs">
       <button class="app-tab active" id="htab-map" onclick="switchHunterTab('map',this)">
@@ -646,9 +646,9 @@ function setAdminFilter(el) { document.querySelectorAll('.fchip').forEach(c=>c.c
 function renderAdminAll() { updateAdminStats(); renderAdminList(); }
 function updateAdminStats() {
   const total=eggs.length, found=eggs.filter(e=>e.found).length, money=eggs.reduce((s,e)=>s+(e.money||0),0);
-  document.getElementById('stat-total').textContent=`🥚 ${total}`;
-  document.getElementById('stat-found').textContent=`✓ ${found}`;
-  document.getElementById('stat-money').textContent=`$${money.toFixed(0)}`;
+  document.getElementById('stat-total').innerHTML=`<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:middle;margin-right:3px;'><path d='M12 22C6.5 22 2 17 2 12 2 6.5 6.5 2 12 2s10 4.5 10 10c0 5-4.5 10-10 10z'/></svg>${total}`;
+  document.getElementById('stat-found').innerHTML=`<svg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:middle;margin-right:3px;'><polyline points='20 6 9 17 4 12'/></svg>${found}`;
+  document.getElementById('stat-money').innerHTML=`$${money.toFixed(0)}`;
 }
 
 function renderAdminList() {
@@ -761,11 +761,11 @@ function updateHunterStats() {
   const total=eggs.length, found=eggs.filter(e=>e.found).length;
   const unclaimed=eggs.filter(e=>!e.found).reduce((s,e)=>s+(e.money||0),0);
   const won=eggs.filter(e=>e.found).reduce((s,e)=>s+(e.money||0),0);
-  document.getElementById('h-total-pill').textContent=`🥚 ${total} eggs`;
-  document.getElementById('h-found-pill').textContent=`✓ ${found} found`;
-  document.getElementById('h-left-pill').textContent=`${total-found} left`;
-  document.getElementById('h-unclaimed').textContent=`💰 $${unclaimed.toFixed(0)} left`;
-  document.getElementById('h-won-pill').textContent=`$${won.toFixed(0)} won`;
+  document.getElementById('h-total-pill').innerHTML=`<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:middle;margin-right:5px;'><path d='M12 22C6.5 22 2 17 2 12 2 6.5 6.5 2 12 2s10 4.5 10 10c0 5-4.5 10-10 10z'/></svg>${total} eggs`;
+  document.getElementById('h-found-pill').innerHTML=`<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:middle;margin-right:5px;'><polyline points='20 6 9 17 4 12'/></svg>${found} found`;
+  document.getElementById('h-left-pill').innerHTML=`<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:middle;margin-right:5px;'><path d='M5 22h14'/><path d='M5 2h14'/><path d='M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22'/><path d='M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2'/></svg>${total-found} left`;
+  document.getElementById('h-unclaimed').innerHTML=`<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:middle;margin-right:5px;'><circle cx='12' cy='12' r='10'/><line x1='12' y1='8' x2='12' y2='16'/><path d='M15.5 8H8.5a3.5 3.5 0 0 0 0 7h7'/></svg>$${unclaimed.toFixed(0)} left`;
+  document.getElementById('h-won-pill').innerHTML=`<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:middle;margin-right:5px;'><polyline points='6 9 6 2 18 2 18 9'/><path d='M6 9a6 6 0 0 0 12 0'/><line x1='12' y1='15' x2='12' y2='22'/><line x1='9' y1='22' x2='15' y2='22'/><path d='M4 4H2v4a3 3 0 0 0 3 3'/><path d='M20 4h2v4a3 3 0 0 1-3 3'/></svg>$${won.toFixed(0)} won`;
 }
 
 function renderHunterMap() {
@@ -786,26 +786,29 @@ function renderHunterGrid() {
     container.innerHTML=`<div class="empty-state"><span class="empty-icon">${hunterFilter==='found'?'🎉':'🌿'}</span><div class="empty-title">${hunterFilter==='found'?'None Found Yet':'All Found!'}</div></div>`;
     return;
   }
-  container.innerHTML=filtered.map(egg=>`
+  container.innerHTML=filtered.map(egg=>{
+    const isClaimed = claimed.includes(egg.id);
+    return `
     <div class="h-egg-card ${egg.found?'is-found':''}">
       <div class="h-egg-inner">
         <div class="h-color-stripe" style="background:${egg.color}"></div>
-        <div class="h-egg-content">
-          <div class="h-egg-row">
-            <div class="h-egg-label">Egg ${egg.num||'?'}</div>
-            ${egg.found?`<div class="h-found-pill">✅ Found</div>`:''}
-          </div>
-          <div class="h-btn-row">
-            ${!egg.found
-              ?`<button class="h-found-btn claim" onclick="hunterClaim('${egg.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><polyline points="20 6 9 17 4 12"/></svg>I Found It!</button>`
-              :(claimed.includes(egg.id)
-                  ?`<button class="h-undo-btn" onclick="hunterUnclaim('${egg.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3"/></svg>Undo Found Egg</button>`
-                  :'')
-            }
+        <div class="h-egg-content" style="padding:14px 16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <div>
+              <div class="h-egg-label" style="font-size:20px;line-height:1.1;">Egg ${egg.num||'?'}</div>
+              ${egg.found?`<div style="font-size:12px;font-weight:700;color:var(--green);margin-top:3px;display:flex;align-items:center;gap:3px;"><svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:middle;margin-right:5px'><polyline points='20 6 9 17 4 12'/></svg>Egg Found</div>`:`<div style="font-size:12px;color:var(--gray);margin-top:3px;">Not yet found</div>`}
+            </div>
+            <div style="flex-shrink:0;">
+              ${!egg.found
+                ?`<button class="h-found-btn claim" style="padding:12px 16px;font-size:16px;white-space:nowrap;" onclick="hunterClaim('${egg.id}')"><svg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:middle;margin-right:6px'><polyline points='20 6 9 17 4 12'/></svg>I Found It!</button>`
+                :(isClaimed?`<button class="h-undo-btn" style="white-space:nowrap;" onclick="hunterUnclaim('${egg.id}')"><svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:middle;margin-right:5px'><polyline points='1 4 1 10 7 10'/><path d='M3.51 15a9 9 0 1 0 .49-3'/></svg>Undo Found Egg</button>`:'')
+              }
+            </div>
           </div>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ── PER-DEVICE CLAIM TRACKING ──
