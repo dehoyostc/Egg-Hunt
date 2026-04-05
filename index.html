@@ -930,7 +930,23 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD7Fd5E_yUytUEnxZB28OzIBmcom4FJ6xQ",
+  authDomain: "egg-hunter-app.firebaseapp.com",
+  projectId: "egg-hunter-app",
+  storageBucket: "egg-hunter-app.firebasestorage.app",
+  messagingSenderId: "745473505002",
+  appId: "1:745473505002:web:faf8f4bec2000d67c20993"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const EGG_DOC = doc(db, 'hunts', 'main');
+
 // ===== STATE =====
 let eggs = [];
 let currentLat = null;
@@ -939,32 +955,45 @@ let currentAccuracy = null;
 let currentPhoto = null;
 let selectedColor = '#f5c842';
 let currentFilter = 'all';
-let syncInterval = null;
-const STORAGE_KEY = 'egg-hunt-shared-v1';
+let lastSavedJSON = '';
 
-// ===== SHARED STORAGE (all players share same data) =====
-async function loadEggs(silent = false) {
-  try {
-    const result = await window.storage.get(STORAGE_KEY, true); // true = shared
-    if (result && result.value) {
-      const incoming = JSON.parse(result.value);
-      // Only re-render if data actually changed
-      if (JSON.stringify(incoming) !== JSON.stringify(eggs)) {
+// ===== FIREBASE LOAD & REAL-TIME SYNC =====
+function startSync() {
+  updateSyncDot('syncing');
+  onSnapshot(EGG_DOC, (snapshot) => {
+    if (snapshot.exists()) {
+      const incoming = snapshot.data().eggs || [];
+      const incomingJSON = JSON.stringify(incoming);
+      if (incomingJSON !== lastSavedJSON) {
+        const wasEmpty = eggs.length === 0;
         eggs = incoming;
+        lastSavedJSON = incomingJSON;
         renderAll();
-        if (silent) showToast('🔄 Egg list updated!');
+        if (!wasEmpty) showToast('🔄 Egg list updated!');
       }
+    } else {
+      eggs = [];
+      renderAll();
     }
-  } catch (e) {
-    eggs = [];
-    renderAll();
-  }
+    updateSyncDot('ok');
+  }, (err) => {
+    console.error('Sync error:', err);
+    updateSyncDot('error');
+    showToast('⚠️ Connection issue. Check your internet.');
+  });
+}
+
+async function loadEggs() {
+  // Initial load handled by onSnapshot above
+  startSync();
 }
 
 async function saveEggs() {
   try {
     updateSyncDot('syncing');
-    await window.storage.set(STORAGE_KEY, JSON.stringify(eggs), true);
+    const json = JSON.stringify(eggs);
+    await setDoc(EGG_DOC, { eggs: eggs, updatedAt: new Date().toISOString() });
+    lastSavedJSON = json;
     updateSyncDot('ok');
   } catch (e) {
     console.error('Save failed:', e);
@@ -973,17 +1002,10 @@ async function saveEggs() {
   }
 }
 
-// Poll for updates every 10 seconds so all players stay in sync
-function startSync() {
-  syncInterval = setInterval(() => loadEggs(true), 10000);
-}
-
-// Show sync status indicator
 function updateSyncDot(status) {
   const dot = document.getElementById('sync-dot');
   if (!dot) return;
   dot.className = 'sync-dot ' + status;
-  dot.title = status === 'ok' ? 'Synced' : status === 'syncing' ? 'Syncing…' : 'Sync error';
 }
 
 // ===== TABS =====
@@ -1313,9 +1335,22 @@ function formatTime(iso) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
 
+// ===== EXPOSE TO GLOBAL SCOPE (needed for inline onclick with type=module) =====
+window.switchTab = switchTab;
+window.lockLocation = lockLocation;
+window.handlePhoto = handlePhoto;
+window.selectColor = selectColor;
+window.saveEgg = saveEgg;
+window.markFound = markFound;
+window.markUnfound = markUnfound;
+window.deleteEgg = deleteEgg;
+window.navigateTo = navigateTo;
+window.setFilter = setFilter;
+window.showPhoto = showPhoto;
+window.closeModal = closeModal;
+
 // ===== INIT =====
-loadEggs(false);
-startSync();
+loadEggs();
 </script>
 </body>
 </html>
