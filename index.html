@@ -857,6 +857,7 @@
           <button class="color-swatch" data-color="#b07ad4" style="background:#b07ad4" onclick="selectColor(this)"></button>
           <button class="color-swatch" data-color="#5aa55a" style="background:#5aa55a" onclick="selectColor(this)"></button>
           <button class="color-swatch" data-color="#ff7043" style="background:#ff7043" onclick="selectColor(this)"></button>
+          <button class="color-swatch" data-color="#c8a97e" style="background:#c8a97e" onclick="selectColor(this)"></button>
           <button class="color-swatch" data-color="#ffffff" style="background:#fff;border:3px solid #ccc" onclick="selectColor(this)"></button>
         </div>
       </div>
@@ -1077,12 +1078,24 @@ function handlePhoto(input) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
-    currentPhoto = e.target.result;
-    document.getElementById('photo-thumb').src = currentPhoto;
-    document.getElementById('photo-thumb').classList.add('visible');
-    document.getElementById('photo-btn').classList.add('has-photo');
-    document.getElementById('photo-btn-text').textContent = 'Photo Taken ✓';
-    showToast('📸 Photo captured!');
+    // Compress image to max 800px wide, 0.7 quality JPEG
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxW = 800;
+      const scale = Math.min(1, maxW / img.width);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      currentPhoto = canvas.toDataURL('image/jpeg', 0.7);
+      document.getElementById('photo-thumb').src = currentPhoto;
+      document.getElementById('photo-thumb').classList.add('visible');
+      document.getElementById('photo-btn').classList.add('has-photo');
+      document.getElementById('photo-btn-text').textContent = 'Photo Taken ✓';
+      showToast('📸 Photo captured!');
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -1265,14 +1278,23 @@ function renderMap() {
     return;
   }
 
-  // Build OpenStreetMap with markers using leaflet
+  // Build satellite map with markers - offset stacked eggs so all are visible
+  const coordCount = {};
   const markersJS = geoEggs.map(egg => {
     const color = egg.found ? '#4caf50' : (egg.color || '#f5c842');
     const label = escHtml(egg.name);
     const money = egg.money > 0 ? `$${egg.money.toFixed(2)}` : '';
+    const key = egg.lat.toFixed(4) + ',' + egg.lng.toFixed(4);
+    coordCount[key] = (coordCount[key] || 0) + 1;
+    const n = coordCount[key];
+    // Spiral offset so stacked eggs spread out slightly
+    const angle = (n - 1) * 2.4;
+    const radius = n === 1 ? 0 : 0.00008 * Math.ceil((n-1)/6);
+    const lat = egg.lat + radius * Math.cos(angle);
+    const lng = egg.lng + radius * Math.sin(angle);
     return `
-      var marker${egg.id.slice(-6)} = L.circleMarker([${egg.lat}, ${egg.lng}], {
-        radius: 10, fillColor: "${color}", color: "#333", weight: 2, opacity: 1, fillOpacity: 0.9
+      var marker${egg.id.slice(-6)} = L.circleMarker([${lat}, ${lng}], {
+        radius: 12, fillColor: "${color}", color: "#fff", weight: 2.5, opacity: 1, fillOpacity: 0.95
       }).addTo(map);
       marker${egg.id.slice(-6)}.bindPopup('<b>${label}</b>${money ? '<br>' + money : ''}${egg.note ? '<br><small>' + escHtml(egg.note) + '</small>' : ''}');
     `;
