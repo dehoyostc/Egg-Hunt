@@ -962,8 +962,9 @@ function startSync() {
   updateSyncDot('syncing');
   onSnapshot(EGG_DOC, (snapshot) => {
     if (snapshot.exists()) {
-      const incoming = snapshot.data().eggs || [];
-      const incomingJSON = JSON.stringify(incoming);
+      const rawEggs = snapshot.data().eggs || [];
+      const incoming = mergePhotos(rawEggs);
+      const incomingJSON = JSON.stringify(rawEggs);
       if (incomingJSON !== lastSavedJSON) {
         const wasEmpty = eggs.length === 0;
         eggs = incoming;
@@ -991,15 +992,28 @@ async function loadEggs() {
 async function saveEggs() {
   try {
     updateSyncDot('syncing');
-    const json = JSON.stringify(eggs);
-    await setDoc(EGG_DOC, { eggs: eggs, updatedAt: new Date().toISOString() });
+    // Save photos locally only (too large for Firestore 1MB limit)
+    const photoMap = {};
+    eggs.forEach(e => { if (e.photo) photoMap[e.id] = e.photo; });
+    try { localStorage.setItem('egg-photos', JSON.stringify(photoMap)); } catch(le) {}
+    // Strip photos before sending to Firebase
+    const eggsNoPhotos = eggs.map(({photo, ...rest}) => rest);
+    const json = JSON.stringify(eggsNoPhotos);
+    await setDoc(EGG_DOC, { eggs: eggsNoPhotos, updatedAt: new Date().toISOString() });
     lastSavedJSON = json;
     updateSyncDot('ok');
   } catch (e) {
     console.error('Save failed:', e);
     updateSyncDot('error');
-    showToast('⚠️ Could not save. Check connection.');
+    showToast('\u26a0\ufe0f Could not save. Check connection.');
   }
+}
+
+function mergePhotos(incomingEggs) {
+  try {
+    const photoMap = JSON.parse(localStorage.getItem('egg-photos') || '{}');
+    return incomingEggs.map(e => ({ ...e, photo: photoMap[e.id] || null }));
+  } catch { return incomingEggs; }
 }
 
 function updateSyncDot(status) {
