@@ -777,6 +777,21 @@
     transform: translateX(-50%) translateY(0);
   }
 
+  .sync-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    background: #4caf50;
+    box-shadow: 0 0 0 2px rgba(76,175,80,0.3);
+    animation: pulse-green 2s infinite;
+  }
+  .sync-dot.syncing { background: #ffa726; box-shadow: 0 0 0 2px rgba(255,167,38,0.3); animation: pulse-orange 1s infinite; }
+  .sync-dot.error { background: #ef5350; animation: none; }
+  @keyframes pulse-green { 0%,100%{box-shadow:0 0 0 2px rgba(76,175,80,0.3)} 50%{box-shadow:0 0 0 5px rgba(76,175,80,0.1)} }
+  @keyframes pulse-orange { 0%,100%{box-shadow:0 0 0 2px rgba(255,167,38,0.3)} 50%{box-shadow:0 0 0 5px rgba(255,167,38,0.1)} }
+
+  .sync-label {
+    font-size: 11px; font-weight: 700; color: #888; display: flex; align-items: center; gap: 4px;
+  }
+
   /* Hidden file input */
   #camera-input { display: none; }
 </style>
@@ -785,12 +800,13 @@
 
 <!-- HEADER -->
 <div class="header">
-  <div class="header-top">
+    <div class="header-top">
     <div class="app-title">
       <span class="egg-icon">🥚</span>
       Egg Hunt Tracker
     </div>
-    <div style="display:flex;gap:6px;">
+    <div style="display:flex;gap:6px;align-items:center;">
+      <div class="sync-label"><div class="sync-dot" id="sync-dot"></div> Live</div>
       <div class="stat-chip total" id="stat-total">🥚 0</div>
       <div class="stat-chip found" id="stat-found">✓ 0</div>
       <div class="stat-chip money" id="stat-money">$0</div>
@@ -920,30 +936,54 @@ let eggs = [];
 let currentLat = null;
 let currentLng = null;
 let currentAccuracy = null;
-let currentPhoto = null; // base64
+let currentPhoto = null;
 let selectedColor = '#f5c842';
 let currentFilter = 'all';
-const STORAGE_KEY = 'egg-hunt-eggs-v2';
+let syncInterval = null;
+const STORAGE_KEY = 'egg-hunt-shared-v1';
 
-// ===== STORAGE =====
-async function loadEggs() {
+// ===== SHARED STORAGE (all players share same data) =====
+async function loadEggs(silent = false) {
   try {
-    const result = await window.storage.get(STORAGE_KEY);
+    const result = await window.storage.get(STORAGE_KEY, true); // true = shared
     if (result && result.value) {
-      eggs = JSON.parse(result.value);
+      const incoming = JSON.parse(result.value);
+      // Only re-render if data actually changed
+      if (JSON.stringify(incoming) !== JSON.stringify(eggs)) {
+        eggs = incoming;
+        renderAll();
+        if (silent) showToast('🔄 Egg list updated!');
+      }
     }
   } catch (e) {
     eggs = [];
+    renderAll();
   }
-  renderAll();
 }
 
 async function saveEggs() {
   try {
-    await window.storage.set(STORAGE_KEY, JSON.stringify(eggs));
+    updateSyncDot('syncing');
+    await window.storage.set(STORAGE_KEY, JSON.stringify(eggs), true);
+    updateSyncDot('ok');
   } catch (e) {
     console.error('Save failed:', e);
+    updateSyncDot('error');
+    showToast('⚠️ Could not save. Check connection.');
   }
+}
+
+// Poll for updates every 10 seconds so all players stay in sync
+function startSync() {
+  syncInterval = setInterval(() => loadEggs(true), 10000);
+}
+
+// Show sync status indicator
+function updateSyncDot(status) {
+  const dot = document.getElementById('sync-dot');
+  if (!dot) return;
+  dot.className = 'sync-dot ' + status;
+  dot.title = status === 'ok' ? 'Synced' : status === 'syncing' ? 'Syncing…' : 'Sync error';
 }
 
 // ===== TABS =====
@@ -1214,8 +1254,8 @@ function renderMap() {
     <div id="map"></div>
     <script>
       var map = L.map('map', {zoomControl: true}).setView([${avgLat}, ${avgLng}], 17);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap', maxZoom: 19
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '© Esri — Esri, DigitalGlobe, GeoEye, Earthstar Geographics', maxZoom: 19
       }).addTo(map);
       ${markersJS}
       var group = L.featureGroup([${geoEggs.map(e => `L.circleMarker([${e.lat},${e.lng}],{radius:1})`).join(',')}]);
@@ -1274,7 +1314,8 @@ function formatTime(iso) {
 }
 
 // ===== INIT =====
-loadEggs();
+loadEggs(false);
+startSync();
 </script>
 </body>
 </html>
