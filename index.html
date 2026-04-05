@@ -1008,18 +1008,7 @@ function setHunterFilter(el, context) {
   else { hunterFilterList=el.dataset.filter; renderHunterEggGrid('list'); }
 }
 
-function renderHunterAll() { updateHunterStats(); renderHunterMap(); renderHunterEggGrid('map'); renderHunterEggGrid('list'); setTimeout(()=>{ if(window.lucide) lucide.createIcons(); },50); }
 
-function updateHunterStats() {
-  const total=eggs.length, found=eggs.filter(e=>e.found).length;
-  const unclaimed=eggs.filter(e=>!e.found).reduce((s,e)=>s+(e.money||0),0);
-  const won=eggs.filter(e=>e.found).reduce((s,e)=>s+(e.money||0),0);
-  document.getElementById('h-total').textContent=total;
-  document.getElementById('h-found').textContent=found;
-  document.getElementById('h-remaining').textContent=total-found;
-  document.getElementById('h-unclaimed').textContent=`💰 $${unclaimed.toFixed(0)} left`;
-  const wonEl=document.getElementById('h-won'); if(wonEl) wonEl.textContent=`$${won.toFixed(0)}`;
-}
 
 function renderHunterMap() {
   const geo=eggs.filter(e=>e.lat);
@@ -1068,21 +1057,8 @@ function removeMyClaimedEgg(id) {
   const list=myClaimedEggs().filter(x=>x!==id);
   try { localStorage.setItem('my-claimed-eggs', JSON.stringify(list)); } catch(e) {}
 }
-function hunterClaim(id) {
-  const egg=eggs.find(e=>e.id===id); if(!egg||egg.found) return;
-  egg.found=true; egg.foundAt=new Date().toISOString();
-  addMyClaimedEgg(id);
-  saveEggs(); renderHunterAll();
-  const allFound=eggs.every(e=>e.found);
-  if(allFound){ launchLastEggCelebration(egg); } else { launchCelebration(egg); }
-}
-function hunterUnclaim(id) {
-  const egg=eggs.find(e=>e.id===id);
-  if(!egg || !myClaimedEggs().includes(id)) { showToast('⚠️ You can only undo eggs you found.'); return; }
-  egg.found=false; egg.foundAt=null;
-  removeMyClaimedEgg(id);
-  saveEggs(); renderHunterAll(); showToast(`↩️ Egg ${egg.num} unmarked.`);
-}
+
+
 function renderHunterAll() { updateHunterStats(); renderHunterMap(); renderHunterEggGrid('map'); renderHunterEggGrid('list'); setTimeout(()=>{ if(window.lucide) lucide.createIcons(); },50); }
 
 function updateHunterStats() {
