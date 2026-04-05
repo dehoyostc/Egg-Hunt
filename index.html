@@ -469,6 +469,11 @@ body {
   100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
 }
 
+@keyframes slide-down {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 /* Toast */
 .toast {
   position: fixed; bottom: 90px; left: 50%;
@@ -484,6 +489,7 @@ body {
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
 
@@ -546,9 +552,9 @@ body {
       </div>
     </div>
     <div class="admin-tabs">
-      <button class="atab active" onclick="switchAdminTab('add')">➕ Hide</button>
-      <button class="atab" onclick="switchAdminTab('list')">📋 List</button>
-      <button class="atab" onclick="switchAdminTab('map')">🗺️ Map</button>
+      <button class="atab active" onclick="switchAdminTab('add')"><i data-lucide="plus-circle" style="width:15px;height:15px;"></i> Hide</button>
+      <button class="atab" onclick="switchAdminTab('list')"><i data-lucide="list" style="width:15px;height:15px;"></i> List</button>
+      <button class="atab" onclick="switchAdminTab('map')"><i data-lucide="map" style="width:15px;height:15px;"></i> Map</button>
     </div>
   </div>
   <div class="admin-main">
@@ -597,8 +603,8 @@ body {
           <label class="field-label">📝 Notes (Optional)</label>
           <input type="text" class="field-input" id="egg-note" placeholder="e.g. Under the big rock…" autocomplete="off">
         </div>
-        <button class="save-btn" onclick="saveEgg()">🥚 Save Egg Location</button>
-        <button class="clear-btn" onclick="clearAllEggs()">🗑️ Clear All Eggs & Start Over</button>
+        <button class="save-btn" onclick="saveEgg()"><i data-lucide="map-pin" style="width:18px;height:18px;"></i> Save Egg Location</button>
+        <button class="clear-btn" onclick="clearAllEggs()"><i data-lucide="trash-2" style="width:16px;height:16px;"></i> Clear All Eggs & Start Over</button>
       </div>
     </div>
     <!-- LIST TAB -->
@@ -606,7 +612,7 @@ body {
       <div class="list-controls">
         <button class="fchip active" data-filter="all" onclick="setAdminFilter(this)">All</button>
         <button class="fchip" data-filter="hidden" onclick="setAdminFilter(this)">🥚 Hidden</button>
-        <button class="fchip" data-filter="found" onclick="setAdminFilter(this)">✅ Found</button>
+        <button class="fchip" data-filter="found" onclick="setAdminFilter(this)"><i data-lucide="check-circle-2" style="width:13px;height:13px;"></i> Found</button>
       </div>
       <div class="egg-list" id="egg-list"></div>
     </div>
@@ -646,9 +652,8 @@ body {
       <div class="h-stat"><span>Left</span><span class="val" id="h-remaining">0</span></div>
       <div class="h-stat" style="border-color:rgba(200,241,53,0.3);"><span>$ Won</span><span class="val" style="color:var(--lime);" id="h-won">$0</span></div>
     </div>
-    <div class="h-tabs">
-      <button class="h-tab active" onclick="switchHunterTab('map')">🗺️ Map</button>
-      <button class="h-tab" onclick="switchHunterTab('list')">📋 Eggs</button>
+    <div class="h-tabs" style="display:none;">
+      <button class="h-tab active" onclick="switchHunterTab('map')"><i data-lucide="map" style="width:15px;height:15px;"></i> Map</button>
     </div>
   </div>
 
@@ -668,22 +673,13 @@ body {
       <div class="h-filter-row">
         <button class="h-filter active" data-filter="all" onclick="setHunterFilter(this,'map')">All</button>
         <button class="h-filter" data-filter="hidden" onclick="setHunterFilter(this,'map')">🥚 Not Found</button>
-        <button class="h-filter" data-filter="found" onclick="setHunterFilter(this,'map')">✅ Found</button>
+        <button class="h-filter" data-filter="found" onclick="setHunterFilter(this,'map')"><i data-lucide="check-circle-2" style="width:13px;height:13px;"></i> Found</button>
       </div>
       <div class="h-egg-grid" id="h-egg-grid-map"></div>
     </div>
   </div>
 
-  <div class="h-view" id="hview-list">
-    <div class="h-egg-section" style="padding-top:16px;">
-      <div class="h-filter-row">
-        <button class="h-filter active" data-filter="all" onclick="setHunterFilter(this,'list')">All</button>
-        <button class="h-filter" data-filter="hidden" onclick="setHunterFilter(this,'list')">🥚 Not Found</button>
-        <button class="h-filter" data-filter="found" onclick="setHunterFilter(this,'list')">✅ Found</button>
-      </div>
-      <div class="h-egg-grid" id="h-egg-grid-list"></div>
-    </div>
-  </div>
+
 </div>
 
 <!-- PHOTO MODAL -->
@@ -791,14 +787,26 @@ function startSync() {
   onSnapshot(EGG_DOC, (snap) => {
     if (snap.exists()) {
       const raw = snap.data().eggs || [];
-      eggCounter = snap.data().counter || raw.length;
+      // Auto-assign num to legacy eggs that are missing it
+      let maxNum = snap.data().counter || 0;
+      raw.forEach((e, i) => {
+        if (!e.num) { e.num = i + 1; }
+        if (e.num > maxNum) maxNum = e.num;
+      });
+      eggCounter = maxNum;
       const incoming = mergePhotos(raw);
       const incomingJSON = JSON.stringify(raw);
       if (incomingJSON !== lastSavedJSON) {
         const wasEmpty = eggs.length === 0;
         eggs = incoming; lastSavedJSON = incomingJSON;
         if (currentMode === 'admin') renderAdminAll();
-        if (currentMode === 'hunter') renderHunterAll();
+        if (currentMode === 'hunter') {
+          renderHunterAll();
+          // If all eggs are found and we didn't trigger the last-egg celeb ourselves, show banner
+          if (!wasEmpty && eggs.length > 0 && eggs.every(e=>e.found)) {
+            setTimeout(showAllFoundBanner, 500);
+          }
+        }
         if (!wasEmpty) showToast('🔄 Eggs updated!');
       }
     } else { eggs = []; if (currentMode==='admin') renderAdminAll(); if (currentMode==='hunter') renderHunterAll(); }
@@ -891,7 +899,7 @@ function deleteEgg(id) { const e=eggs.find(x=>x.id===id); if(!e) return; if(!con
 function setAdminFilter(el) { document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); adminFilter=el.dataset.filter; renderAdminList(); }
 
 // ===== ADMIN RENDER =====
-function renderAdminAll() { updateAdminStats(); renderAdminList(); }
+function renderAdminAll() { updateAdminStats(); renderAdminList(); setTimeout(()=>{ if(window.lucide) lucide.createIcons(); },50); }
 function updateAdminStats() {
   const total=eggs.length, found=eggs.filter(e=>e.found).length, money=eggs.reduce((s,e)=>s+(e.money||0),0);
   document.getElementById('stat-total').textContent=`🥚 ${total}`;
@@ -918,10 +926,10 @@ function renderAdminList() {
           ${egg.note?`<div class="egg-note">📝 ${escHtml(egg.note)}</div>`:''}
           ${egg.found?`<div class="found-badge">✅ Found ${egg.foundAt?formatTime(egg.foundAt):''}</div>`:''}
           <div class="egg-actions">
-            ${!egg.found?`<button class="eabtn btn-found" onclick="adminMarkFound('${egg.id}')">✅ Found</button>`:`<button class="eabtn btn-unfound" onclick="adminMarkUnfound('${egg.id}')">↩️ Rehide</button>`}
-            ${egg.lat?`<button class="eabtn btn-nav" onclick="navTo(${egg.lat},${egg.lng})">🧭 Nav</button>`:''}
+            ${!egg.found?`<button class="eabtn btn-found" onclick="adminMarkFound('${egg.id}')"><i data-lucide="check-circle-2" style="width:13px;height:13px;"></i> Found</button>`:`<button class="eabtn btn-unfound" onclick="adminMarkUnfound('${egg.id}')"><i data-lucide="rotate-ccw" style="width:13px;height:13px;"></i> Rehide</button>`}
+            ${egg.lat?`<button class="eabtn btn-nav" onclick="navTo(${egg.lat},${egg.lng})"><i data-lucide="navigation" style="width:13px;height:13px;"></i> Nav</button>`:''}
             ${egg.photo?`<button class="eabtn btn-photo" onclick="showPhoto('${egg.id}')">📷</button>`:''}
-            <button class="eabtn btn-delete" onclick="deleteEgg('${egg.id}')">🗑️</button>
+            <button class="eabtn btn-delete" onclick="deleteEgg('${egg.id}')"><i data-lucide="trash-2" style="width:13px;height:13px;"></i></button>
           </div>
         </div>
         ${egg.photo?`<div class="egg-photo-thumb"><img src="${egg.photo}" alt="" onclick="showPhoto('${egg.id}')"></div>`:''}
@@ -965,7 +973,7 @@ function renderAdminMap() {
         <div class="map-egg-name">Egg ${egg.num||'?'}${egg.money>0?` — $${egg.money.toFixed(2)}`:''}</div>
         <div class="map-egg-coord">${egg.lat.toFixed(5)}, ${egg.lng.toFixed(5)}</div>
       </div>
-      <button class="map-nav-btn" onclick="navTo(${egg.lat},${egg.lng})">🧭 Nav</button>
+      <button class="map-nav-btn" onclick="navTo(${egg.lat},${egg.lng})"><i data-lucide="navigation" style="width:13px;height:13px;"></i> Nav</button>
     </div>`).join('');
 }
 
@@ -1000,7 +1008,7 @@ function setHunterFilter(el, context) {
   else { hunterFilterList=el.dataset.filter; renderHunterEggGrid('list'); }
 }
 
-function renderHunterAll() { updateHunterStats(); renderHunterMap(); renderHunterEggGrid('map'); renderHunterEggGrid('list'); }
+function renderHunterAll() { updateHunterStats(); renderHunterMap(); renderHunterEggGrid('map'); renderHunterEggGrid('list'); setTimeout(()=>{ if(window.lucide) lucide.createIcons(); },50); }
 
 function updateHunterStats() {
   const total=eggs.length, found=eggs.filter(e=>e.found).length;
@@ -1038,8 +1046,85 @@ function renderHunterEggGrid(context) {
           <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
             <div class="h-egg-num" style="font-size:20px;">Egg ${egg.num||'?'}</div>
             ${egg.found
-              ?`<div class="h-found-pill">✅ Found</div>`
-              :`<div style="display:flex;gap:8px;align-items:center;"><button class="h-found-btn claim" style="padding:8px 14px;font-size:15px;border-radius:10px;" onclick="hunterClaim('${egg.id}')">🎉 Found It!</button>${egg.lat?`<button class="h-nav-btn" style="padding:8px 12px;font-size:15px;" onclick="navTo(${egg.lat},${egg.lng})">🧭</button>`:''}</div>`
+              ? (myClaimedEggs().includes(egg.id)
+                  ? `<div style="display:flex;gap:8px;align-items:center;"><div class="h-found-pill">✅ Found</div><button onclick="hunterUnclaim('${egg.id}')" style="background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3);border-radius:100px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Undo</button></div>`
+                  : `<div class="h-found-pill">✅ Found</div>`)
+              :`<div style="display:flex;gap:8px;align-items:center;"><button class="h-found-btn claim" style="padding:8px 14px;font-size:15px;border-radius:10px;" onclick="hunterClaim('${egg.id}')">🎉 Found It!</button>${egg.lat?`<button class="h-nav-btn" style="padding:8px 12px;font-size:15px;" onclick="navTo(${egg.lat},${egg.lng})"><i data-lucide="navigation" style="width:14px;height:14px;"></i></button>`:''}</div>`
+            }
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function myClaimedEggs() {
+  try { return JSON.parse(localStorage.getItem('my-claimed-eggs')||'[]'); } catch { return []; }
+}
+function addMyClaimedEgg(id) {
+  const list=myClaimedEggs(); if(!list.includes(id)) list.push(id);
+  try { localStorage.setItem('my-claimed-eggs', JSON.stringify(list)); } catch(e) {}
+}
+function removeMyClaimedEgg(id) {
+  const list=myClaimedEggs().filter(x=>x!==id);
+  try { localStorage.setItem('my-claimed-eggs', JSON.stringify(list)); } catch(e) {}
+}
+function hunterClaim(id) {
+  const egg=eggs.find(e=>e.id===id); if(!egg||egg.found) return;
+  egg.found=true; egg.foundAt=new Date().toISOString();
+  addMyClaimedEgg(id);
+  saveEggs(); renderHunterAll();
+  const allFound=eggs.every(e=>e.found);
+  if(allFound){ launchLastEggCelebration(egg); } else { launchCelebration(egg); }
+}
+function hunterUnclaim(id) {
+  const egg=eggs.find(e=>e.id===id);
+  if(!egg || !myClaimedEggs().includes(id)) { showToast('⚠️ You can only undo eggs you found.'); return; }
+  egg.found=false; egg.foundAt=null;
+  removeMyClaimedEgg(id);
+  saveEggs(); renderHunterAll(); showToast(`↩️ Egg ${egg.num} unmarked.`);
+}
+function renderHunterAll() { updateHunterStats(); renderHunterMap(); renderHunterEggGrid('map'); renderHunterEggGrid('list'); setTimeout(()=>{ if(window.lucide) lucide.createIcons(); },50); }
+
+function updateHunterStats() {
+  const total=eggs.length, found=eggs.filter(e=>e.found).length;
+  const unclaimed=eggs.filter(e=>!e.found).reduce((s,e)=>s+(e.money||0),0);
+  const won=eggs.filter(e=>e.found).reduce((s,e)=>s+(e.money||0),0);
+  document.getElementById('h-total').textContent=total;
+  document.getElementById('h-found').textContent=found;
+  document.getElementById('h-remaining').textContent=total-found;
+  document.getElementById('h-unclaimed').textContent=`💰 $${unclaimed.toFixed(0)} left`;
+  const wonEl=document.getElementById('h-won'); if(wonEl) wonEl.textContent=`$${won.toFixed(0)}`;
+}
+
+function renderHunterMap() {
+  const geo=eggs.filter(e=>e.lat);
+  updateHunterStats();
+  if(!geo.length){document.getElementById('hunter-map-frame').src='about:blank';return;}
+  document.getElementById('hunter-map-frame').srcdoc=buildMapHTML(geo,false);
+}
+
+function renderHunterEggGrid(context) {
+  const filter=context==='map'?hunterFilterMap:hunterFilterList;
+  const containerId=context==='map'?'h-egg-grid-map':'h-egg-grid-list';
+  const container=document.getElementById(containerId);
+  // Sort: unfound first numerically, then found numerically
+  let sorted=[...eggs].sort((a,b)=>{ if(a.found!==b.found) return a.found?1:-1; return (a.num||0)-(b.num||0); });
+  let filtered=sorted;
+  if(filter==='hidden') filtered=sorted.filter(e=>!e.found);
+  if(filter==='found') filtered=sorted.filter(e=>e.found);
+  if(!filtered.length){container.innerHTML=`<div class="h-empty"><span class="h-empty-icon">${filter==='found'?'🎉':'🌿'}</span><div class="h-empty-title">${filter==='found'?'None found yet!':'All found!'}</div></div>`;return;}
+  container.innerHTML=filtered.map(egg=>`
+    <div class="h-egg-card ${egg.found?'is-found':''}">
+      <div class="h-egg-inner">
+        <div class="h-color-stripe" style="background:${egg.color}"></div>
+        <div class="h-egg-content" style="padding:14px 16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <div class="h-egg-num" style="font-size:20px;">Egg ${egg.num||'?'}</div>
+            ${egg.found
+              ? (myClaimedEggs().includes(egg.id)
+                  ? `<div style="display:flex;gap:8px;align-items:center;"><div class="h-found-pill">✅ Found</div><button onclick="hunterUnclaim('${egg.id}')" style="background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3);border-radius:100px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:0.5px;">Undo</button></div>`
+                  : `<div class="h-found-pill">✅ Found</div>`)
+              :`<div style="display:flex;gap:8px;align-items:center;"><button class="h-found-btn claim" style="padding:8px 14px;font-size:15px;border-radius:10px;" onclick="hunterClaim('${egg.id}')">🎉 Found It!</button>${egg.lat?`<button class="h-nav-btn" style="padding:8px 12px;font-size:15px;" onclick="navTo(${egg.lat},${egg.lng})"><i data-lucide="navigation" style="width:14px;height:14px;"></i></button>`:''}</div>`
             }
           </div>
         </div>
@@ -1063,13 +1148,43 @@ function hunterUnclaim(id) {
 function launchCelebration(egg) {
   document.getElementById('celeb-amount').textContent=egg.money>0?`$${egg.money.toFixed(2)}`:'🎊';
   document.getElementById('celeb-sub').textContent=`Egg ${egg.num||'?'} — Congratulations!`;
+  document.getElementById('celeb-emoji').textContent='🎉';
+  document.getElementById('celeb-label').textContent='YOU FOUND';
   const overlay=document.getElementById('celebration-overlay');
   overlay.classList.add('active');
-  // Reset card animation
   const card=document.getElementById('celebration-card');
   card.style.animation='none'; void card.offsetWidth;
   card.style.animation='pop-in 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.2s forwards';
   spawnConfetti();
+}
+
+function launchLastEggCelebration(egg) {
+  document.getElementById('celeb-amount').textContent=egg.money>0?`$${egg.money.toFixed(2)}`:'🎊';
+  document.getElementById('celeb-sub').textContent=`🏆 YOU FOUND THE LAST EGG! 🏆`;
+  document.getElementById('celeb-emoji').textContent='🐰';
+  document.getElementById('celeb-label').textContent='LAST EGG — EASTER PAYDAY COMPLETE!';
+  const overlay=document.getElementById('celebration-overlay');
+  overlay.classList.add('active');
+  const card=document.getElementById('celebration-card');
+  card.style.cssText += ';background:linear-gradient(135deg,#c8f135,#fbbf24);';
+  card.style.animation='none'; void card.offsetWidth;
+  card.style.animation='pop-in 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.2s forwards';
+  // Extra big confetti burst
+  spawnConfetti(); setTimeout(spawnConfetti, 600); setTimeout(spawnConfetti, 1200);
+  // Show global banner to all players after a moment
+  setTimeout(()=>showAllFoundBanner(), 3000);
+}
+
+function showAllFoundBanner() {
+  let banner = document.getElementById('all-found-banner');
+  if(!banner) {
+    banner = document.createElement('div');
+    banner.id = 'all-found-banner';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:4000;background:linear-gradient(135deg,#c8f135,#fbbf24);padding:20px 24px;text-align:center;animation:slide-down 0.5s ease forwards;';
+    banner.innerHTML = `<div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:1px;">🐰 All Eggs Found! Easter Payday Complete! 🏆</div><div style="font-size:14px;color:rgba(0,0,0,0.6);margin-top:4px;">Every egg has been claimed.</div>`;
+    document.body.appendChild(banner);
+    setTimeout(()=>{ if(banner.parentNode) banner.parentNode.removeChild(banner); }, 8000);
+  }
 }
 function closeCelebration() {
   document.getElementById('celebration-overlay').classList.remove('active');
@@ -1114,9 +1229,16 @@ window.adminMarkFound=adminMarkFound; window.adminMarkUnfound=adminMarkUnfound;
 window.deleteEgg=deleteEgg; window.navTo=navTo;
 window.setAdminFilter=setAdminFilter; window.showPhoto=showPhoto; window.closeModal=closeModal;
 window.switchHunterTab=switchHunterTab; window.setHunterFilter=setHunterFilter;
-window.hunterClaim=hunterClaim; window.hunterUnclaim=hunterUnclaim;
+window.hunterClaim=hunterClaim; window.hunterUnclaim=hunterUnclaim; window.myClaimedEggs=myClaimedEggs; window.addMyClaimedEgg=addMyClaimedEgg; window.removeMyClaimedEgg=removeMyClaimedEgg;
 window.closeCelebration=closeCelebration;
-window.claimEggFromMap=function(id){ const egg=eggs.find(e=>e.id===id); if(!egg||egg.found) return; egg.found=true; egg.foundAt=new Date().toISOString(); saveEggs(); renderHunterAll(); launchCelebration(egg); };
+window.claimEggFromMap=function(id){
+  const egg=eggs.find(e=>e.id===id); if(!egg||egg.found) return;
+  egg.found=true; egg.foundAt=new Date().toISOString();
+  addMyClaimedEgg(id);
+  saveEggs(); renderHunterAll();
+  const allFound=eggs.every(e=>e.found);
+  if(allFound){ launchLastEggCelebration(egg); } else { launchCelebration(egg); }
+};
 
 // ===== INIT =====
 startSync();
