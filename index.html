@@ -936,13 +936,11 @@ function resetGPSBtn() {
 }
 
 function foundByGPS() {
-  // Must call getCurrentPosition DIRECTLY here - no async wrapper before it.
-  // Safari iOS blocks geolocation if called inside a Promise .then() chain
-  // because it no longer sees it as a direct user gesture.
   if(!eggs.some(e=>!e.found)) { showToast('🎉 All eggs have been found!'); return; }
   if(!navigator.geolocation) { showGPSError('UNSUPPORTED'); return; }
-  const btn = document.querySelector('.gps-claim-btn');
-  if(btn) { btn.innerHTML = '📡 Getting location...'; btn.disabled = true; }
+  // Change text only - never disable the button (avoids stuck-button bug)
+  var btn = document.querySelector('.gps-claim-btn');
+  if(btn) { btn.innerHTML = '📡 Getting location...'; }
   navigator.geolocation.getCurrentPosition(
     function(pos) {
       resetGPSBtn();
@@ -967,7 +965,7 @@ function foundByGPS() {
       else if(err.code === 3) { showGPSError('TIMEOUT'); }
       else { showGPSError('GENERIC'); }
     },
-    {enableHighAccuracy: false, timeout: 15000, maximumAge: 10000}
+    {enableHighAccuracy: false, timeout: 15000, maximumAge: 0}
   );
 }
 
