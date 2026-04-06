@@ -215,7 +215,7 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
 @keyframes slide-down{from{transform:translateY(-100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
 
 /* ── TOAST ── */
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:var(--white);padding:14px 24px;border-radius:16px;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;z-index:3000;opacity:0;transition:all 0.3s;border:1px solid #333;white-space:normal;max-width:85vw;text-align:center;line-height:1.4;}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:var(--white);padding:14px 24px;border-radius:16px;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;z-index:3000;pointer-events:none;opacity:0;transition:all 0.3s;border:1px solid #333;white-space:normal;max-width:85vw;text-align:center;line-height:1.4;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
@@ -988,7 +988,7 @@ function showGPSError(type) {
     t.style.lineHeight = '1.4';
     t.textContent = msg;
     t.classList.add('show');
-    setTimeout(function(){ t.classList.remove('show'); t.style.cssText=''; }, 7000);
+    setTimeout(function(){ t.classList.remove('show'); t.style.cssText=''; }, 4000);
   }
 }
 
