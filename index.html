@@ -182,7 +182,7 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
 .h-filter.active{background:var(--lime);color:var(--black);border-color:var(--lime);}
 .h-egg-grid{display:flex;flex-direction:column;gap:10px;}
 .h-egg-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
-.h-egg-card.is-found{background:var(--green-bg);border-color:rgba(34,197,94,0.3);}
+.h-egg-card.is-found{background:#1a1a1a;border-color:rgba(150,150,150,0.3);opacity:0.75;}
 .h-egg-inner{display:flex;align-items:stretch;}
 .h-color-stripe{width:5px;flex-shrink:0;}
 .h-egg-content{flex:1;padding:14px 16px;}
@@ -191,6 +191,9 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
 .h-found-pill{background:var(--green);color:white;border-radius:100px;padding:4px 12px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;}
 .h-btn-row{display:flex;gap:8px;margin-top:10px;}
 .h-found-btn{flex:1;padding:12px;border:none;border-radius:12px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;text-transform:uppercase;cursor:pointer;-webkit-appearance:none;transition:transform 0.1s;}
+.gps-claim-btn{width:100%;padding:20px;background:var(--lime);color:var(--black);border:none;border-radius:16px;font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;gap:10px;margin:16px 0;transition:transform 0.1s;}
+.gps-claim-btn:active{transform:scale(0.97);}
+.find-me-label{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--lime);}
 .h-found-btn:active{transform:scale(0.96);}
 .h-found-btn.claim{background:var(--lime);color:var(--black);}
 .h-undo-btn{padding:12px 14px;background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.25);border-radius:12px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;cursor:pointer;-webkit-appearance:none;white-space:nowrap;}
@@ -427,12 +430,16 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
         <iframe id="hunter-map-frame" src="about:blank"></iframe>
         <div class="h-map-legend">
           <div class="h-legend-item"><div class="legend-dot" style="background:#f5c842;border-radius:50%;width:10px;height:10px;"></div>Not Found</div>
-          <div class="h-legend-item"><div class="legend-dot" style="background:#22c55e;border-radius:50%;width:10px;height:10px;"></div>Found</div>
+          <div class="h-legend-item"><div class="legend-dot" style="background:#888;border-radius:50%;width:10px;height:10px;"></div>Found</div>
         </div>
       </div>
     </div>
     <div class="h-egg-section">
       <div id="h-big-stats" style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;color:var(--white);margin-bottom:16px;line-height:1.1;"></div>
+      <button class="gps-claim-btn" onclick="foundByGPS()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        I Found One!
+      </button>
       <div class="h-section-label">Eggs</div>
       <div class="h-filter-row">
         <button class="h-filter active" data-filter="all" onclick="setHunterFilter(this)">All</button>
@@ -877,7 +884,6 @@ function renderHunterMap() {
 function renderHunterGrid() {
   const container=document.getElementById('h-egg-grid');
   const claimed=myClaimedEggs();
-  // Sort: unfound numerically first, then found numerically
   let sorted=[...eggs].sort((a,b)=>{ if(a.found!==b.found) return a.found?1:-1; return (a.num||0)-(b.num||0); });
   let filtered=sorted;
   if(hunterFilter==='hidden') filtered=sorted.filter(e=>!e.found);
@@ -889,18 +895,18 @@ function renderHunterGrid() {
   container.innerHTML=filtered.map(egg=>`
     <div class="h-egg-card ${egg.found?'is-found':''}">
       <div class="h-egg-inner">
-        <div class="h-color-stripe" style="background:${egg.color}"></div>
+        <div class="h-color-stripe" style="background:${egg.found?'#888':egg.color}"></div>
         <div class="h-egg-content">
           <div class="h-egg-row">
             <div>
-              <div class="h-egg-label">Egg ${egg.num||'?'}</div>
-              ${egg.found?`<div style="font-size:12px;color:var(--green);font-weight:700;margin-top:2px;display:flex;align-items:center;gap:4px;"><svg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg> EGG FOUND</div>`:''}
+              <div class="h-egg-label" style="${egg.found?'color:#888;':''}">Egg ${egg.num||'?'}</div>
+              ${egg.found?`<div style="font-size:12px;color:#888;font-weight:700;margin-top:2px;display:flex;align-items:center;gap:4px;"><svg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg> EGG FOUND</div>`:''}
             </div>
             ${egg.found
               ?(claimed.includes(egg.id)
                 ?`<button class="h-undo-btn" onclick="hunterUnclaim('${egg.id}')"><svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='1 4 1 10 7 10'/><path d='M3.51 15a9 9 0 1 0 .49-3'/></svg> Undo Found Egg</button>`
-                :`<div class="h-found-pill">✓ Found</div>`)
-              :`<button class="h-found-btn claim" onclick="hunterClaim('${egg.id}')"><svg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg> I FOUND IT!</button>`
+                :`<div style="font-size:13px;font-weight:700;color:#666;">✓</div>`)
+              :`<div class="find-me-label">FIND ME!</div>`
             }
           </div>
         </div>
@@ -921,6 +927,47 @@ function removeMyClaimedEgg(id) {
   try { localStorage.setItem('my-claimed-eggs', JSON.stringify(list)); } catch(e) {}
 }
 
+function foundByGPS() {
+  if(!eggs.some(e=>!e.found)) { showToast('🎉 All eggs have been found!'); return; }
+  const btn = document.querySelector('.gps-claim-btn');
+  if(btn) { btn.textContent='📡 Getting location...'; btn.disabled=true; }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      if(btn) { btn.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> I Found One!'; btn.disabled=false; }
+      const myLat = pos.coords.latitude;
+      const myLng = pos.coords.longitude;
+      // Find nearest unfound egg
+      let nearest = null, nearestDist = Infinity;
+      eggs.filter(e=>!e.found && e.lat).forEach(egg=>{
+        const dist = getDistanceMeters(myLat, myLng, egg.lat, egg.lng);
+        if(dist < nearestDist) { nearestDist = dist; nearest = egg; }
+      });
+      const RADIUS_M = 30;
+      if(!nearest) { showToast('⚠️ No eggs with GPS found nearby.'); return; }
+      if(nearestDist > RADIUS_M) {
+        showToast(`🔍 No egg within ${RADIUS_M}m. Nearest is ${Math.round(nearestDist)}m away.`);
+        return;
+      }
+      hunterClaim(nearest.id);
+    },
+    () => {
+      if(btn) { btn.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> I Found One!'; btn.disabled=false; }
+      showToast('⚠️ GPS failed. Check your location permissions.');
+    },
+    {enableHighAccuracy:true, timeout:10000, maximumAge:0}
+  );
+}
+
+function getDistanceMeters(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLng = (lng2-lng1) * Math.PI/180;
+  const a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+            Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+            Math.sin(dLng/2)*Math.sin(dLng/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
 function hunterClaim(id) {
   const egg=eggs.find(e=>e.id===id); if(!egg||egg.found) return;
   egg.found=true; egg.foundAt=new Date().toISOString();
@@ -939,6 +986,7 @@ function hunterUnclaim(id) {
 }
 
 // Map popup claim
+window.__foundByGPS=foundByGPS;
 window.claimEggFromMap = function(id) {
   const egg=eggs.find(e=>e.id===id); if(!egg||egg.found) return;
   egg.found=true; egg.foundAt=new Date().toISOString();
@@ -1024,6 +1072,7 @@ window.__setAdminFilter=setAdminFilter; window.__showPhoto=showPhoto; window.__c
 window.__switchHunterTab=switchHunterTab; window.__setHunterFilter=setHunterFilter;
 window.__hunterClaim=hunterClaim; window.__hunterUnclaim=hunterUnclaim;
 window.__closeCelebration=closeCelebration;
+window.__foundByGPS=foundByGPS;
 window.claimEggFromMap=function(id){
   const egg=eggs.find(e=>e.id===id); if(!egg||egg.found) return;
   egg.found=true; egg.foundAt=new Date().toISOString();
