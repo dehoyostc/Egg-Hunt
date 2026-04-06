@@ -651,7 +651,7 @@ function lockLocation() {
       disp.classList.add('visible'); showToast('📍 Location locked!');
     },
     () => { btn.classList.remove('loading'); text.textContent='GPS Failed – Tap to Retry'; showToast('⚠️ GPS failed.'); },
-    {enableHighAccuracy:true,timeout:15000,maximumAge:5000}
+    {enableHighAccuracy:false,timeout:15000,maximumAge:10000}
   );
 }
 
@@ -967,7 +967,7 @@ function foundByGPS() {
       else if(err.code === 3) { showGPSError('TIMEOUT'); }
       else { showGPSError('GENERIC'); }
     },
-    {enableHighAccuracy: true, timeout: 15000, maximumAge: 5000}
+    {enableHighAccuracy: false, timeout: 15000, maximumAge: 10000}
   );
 }
 
