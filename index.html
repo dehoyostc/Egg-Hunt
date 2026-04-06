@@ -122,7 +122,7 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
 .egg-money-tag{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--orange);}
 .egg-coords{font-size:11px;color:var(--gray);font-family:'Courier New',monospace;margin-top:2px;}
 .egg-note{font-size:13px;color:var(--lgray);margin-top:3px;}
-.found-badge{display:inline-flex;align-items:center;gap:4px;background:var(--green);color:white;border-radius:8px;padding:2px 8px;font-size:11px;font-weight:700;margin-top:4px;}
+.found-badge{display:inline-flex;align-items:center;gap:4px;background:#555;color:#ccc;border-radius:8px;padding:2px 8px;font-size:11px;font-weight:700;margin-top:4px;}
 .egg-actions{display:flex;gap:6px;margin-top:10px;}
 .eabtn{flex:1;padding:8px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;cursor:pointer;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;}
 .eabtn svg{width:12px;height:12px;stroke:currentColor;flex-shrink:0;}
@@ -188,7 +188,7 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
 .h-egg-content{flex:1;padding:14px 16px;}
 .h-egg-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .h-egg-label{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;text-transform:uppercase;color:var(--white);}
-.h-found-pill{background:var(--green);color:white;border-radius:100px;padding:4px 12px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;}
+.h-found-pill{background:#555;color:#ccc;border-radius:100px;padding:4px 12px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;}
 .h-btn-row{display:flex;gap:8px;margin-top:10px;}
 .h-found-btn{flex:1;padding:12px;border:none;border-radius:12px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;text-transform:uppercase;cursor:pointer;-webkit-appearance:none;transition:transform 0.1s;}
 .gps-claim-btn{width:100%;padding:20px;background:var(--lime);color:var(--black);border:none;border-radius:16px;font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;gap:10px;margin:16px 0;transition:transform 0.1s;}
@@ -215,7 +215,7 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
 @keyframes slide-down{from{transform:translateY(-100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
 
 /* ── TOAST ── */
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dark);color:var(--white);padding:12px 20px;border-radius:100px;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;z-index:3000;opacity:0;transition:all 0.3s;border:1px solid var(--border);white-space:nowrap;}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:var(--white);padding:14px 24px;border-radius:16px;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;z-index:3000;opacity:0;transition:all 0.3s;border:1px solid #333;white-space:normal;max-width:85vw;text-align:center;line-height:1.4;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
@@ -489,7 +489,7 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
 ["goHider","goHunter","goSplash","confirmHunterName","pinKey","pinDel","switchAdminTab","lockLocation",
  "handlePhoto","selectColor","saveEgg","clearAllEggs","adminMarkFound","adminMarkUnfound",
  "deleteEgg","navTo","setAdminFilter","showPhoto","closeModal","switchHunterTab",
- "setHunterFilter","hunterClaim","hunterUnclaim","closeCelebration","foundByGPS","doGetPosition","resetGPSBtn"
+ "setHunterFilter","hunterClaim","hunterUnclaim","closeCelebration","foundByGPS","resetGPSBtn"
 ].forEach(function(fn){
   window[fn]=function(){ var a=arguments;
     if(window["__"+fn]){ window["__"+fn].apply(null,a); }
@@ -787,7 +787,7 @@ function renderAdminList() {
 function buildMapHTML(geoEggs, isAdmin) {
   const coordCount={};
   const markers=geoEggs.map(egg=>{
-    const color=egg.found?'#22c55e':(egg.color||'#f5c842');
+    const color=egg.found?'#888888':(egg.color||'#f5c842');
     const key=egg.lat.toFixed(4)+','+egg.lng.toFixed(4);
     coordCount[key]=(coordCount[key]||0)+1;
     const n=coordCount[key], angle=(n-1)*2.4, r=n===1?0:0.00008*Math.ceil((n-1)/6);
@@ -936,42 +936,24 @@ function resetGPSBtn() {
 }
 
 function foundByGPS() {
+  // Must call getCurrentPosition DIRECTLY here - no async wrapper before it.
+  // Safari iOS blocks geolocation if called inside a Promise .then() chain
+  // because it no longer sees it as a direct user gesture.
   if(!eggs.some(e=>!e.found)) { showToast('🎉 All eggs have been found!'); return; }
-  // Check if geolocation is supported
-  if(!navigator.geolocation) {
-    showGPSError('PERMISSION');
-    return;
-  }
+  if(!navigator.geolocation) { showGPSError('UNSUPPORTED'); return; }
   const btn = document.querySelector('.gps-claim-btn');
   if(btn) { btn.innerHTML = '📡 Getting location...'; btn.disabled = true; }
-
-  // Use permissions API first if available (Chrome) to give better error messages
-  if(navigator.permissions && navigator.permissions.query) {
-    navigator.permissions.query({name:'geolocation'}).then(result => {
-      if(result.state === 'denied') {
-        resetGPSBtn();
-        showGPSError('DENIED');
-        return;
-      }
-      doGetPosition();
-    }).catch(() => doGetPosition());
-  } else {
-    doGetPosition();
-  }
-}
-
-function doGetPosition() {
   navigator.geolocation.getCurrentPosition(
-    (pos) => {
+    function(pos) {
       resetGPSBtn();
-      const myLat = pos.coords.latitude;
-      const myLng = pos.coords.longitude;
-      let nearest = null, nearestDist = Infinity;
-      eggs.filter(e=>!e.found && e.lat).forEach(egg=>{
-        const dist = getDistanceMeters(myLat, myLng, egg.lat, egg.lng);
+      var myLat = pos.coords.latitude;
+      var myLng = pos.coords.longitude;
+      var nearest = null, nearestDist = Infinity;
+      eggs.filter(function(e){ return !e.found && e.lat; }).forEach(function(egg){
+        var dist = getDistanceMeters(myLat, myLng, egg.lat, egg.lng);
         if(dist < nearestDist) { nearestDist = dist; nearest = egg; }
       });
-      const RADIUS_M = 30;
+      var RADIUS_M = 30;
       if(!nearest) { showToast('⚠️ No eggs with GPS found nearby.'); return; }
       if(nearestDist > RADIUS_M) {
         showToast('🔍 No egg within ' + RADIUS_M + 'm. Nearest is ' + Math.round(nearestDist) + 'm away.');
@@ -979,34 +961,36 @@ function doGetPosition() {
       }
       hunterClaim(nearest.id);
     },
-    (err) => {
+    function(err) {
       resetGPSBtn();
       if(err.code === 1) { showGPSError('DENIED'); }
       else if(err.code === 3) { showGPSError('TIMEOUT'); }
       else { showGPSError('GENERIC'); }
     },
-    {enableHighAccuracy:true, timeout:15000, maximumAge:5000}
+    {enableHighAccuracy: true, timeout: 15000, maximumAge: 5000}
   );
 }
 
 function showGPSError(type) {
-  let msg = '';
-  if(type === 'DENIED' || type === 'PERMISSION') {
-    msg = '📍 Location blocked. In Safari: tap AA in address bar → Website Settings → Location → Allow';
+  var msg = '';
+  if(type === 'DENIED') {
+    msg = 'Location blocked. Go to iPhone Settings → Safari → Location → Allow, then try again.';
   } else if(type === 'TIMEOUT') {
-    msg = '⏱️ GPS timed out. Step outside and try again.';
+    msg = 'GPS timed out. Step outside and try again.';
+  } else if(type === 'UNSUPPORTED') {
+    msg = 'GPS not supported on this browser.';
   } else {
-    msg = '⚠️ GPS unavailable. Make sure Location is enabled in your iPhone Settings → Privacy → Location Services.';
+    msg = 'GPS error. Check iPhone Settings → Privacy → Location Services is ON.';
   }
-  // Show as a longer toast
-  const t = document.getElementById('toast');
+  var t = document.getElementById('toast');
   if(t) {
     t.style.whiteSpace = 'normal';
-    t.style.maxWidth = '90vw';
+    t.style.maxWidth = '88vw';
     t.style.textAlign = 'center';
+    t.style.lineHeight = '1.4';
     t.textContent = msg;
     t.classList.add('show');
-    setTimeout(() => { t.classList.remove('show'); t.style.whiteSpace = ''; t.style.maxWidth = ''; }, 6000);
+    setTimeout(function(){ t.classList.remove('show'); t.style.cssText=''; }, 7000);
   }
 }
 
@@ -1038,7 +1022,7 @@ function hunterUnclaim(id) {
 }
 
 // Map popup claim
-window.__foundByGPS=foundByGPS; window.__doGetPosition=doGetPosition; window.__resetGPSBtn=resetGPSBtn;
+window.__foundByGPS=foundByGPS; window.__resetGPSBtn=resetGPSBtn;
 window.claimEggFromMap = function(id) {
   const egg=eggs.find(e=>e.id===id); if(!egg||egg.found) return;
   egg.found=true; egg.foundAt=new Date().toISOString();
@@ -1124,7 +1108,7 @@ window.__setAdminFilter=setAdminFilter; window.__showPhoto=showPhoto; window.__c
 window.__switchHunterTab=switchHunterTab; window.__setHunterFilter=setHunterFilter;
 window.__hunterClaim=hunterClaim; window.__hunterUnclaim=hunterUnclaim;
 window.__closeCelebration=closeCelebration;
-window.__foundByGPS=foundByGPS; window.__doGetPosition=doGetPosition; window.__resetGPSBtn=resetGPSBtn;
+window.__foundByGPS=foundByGPS; window.__resetGPSBtn=resetGPSBtn;
 window.claimEggFromMap=function(id){
   const egg=eggs.find(e=>e.id===id); if(!egg||egg.found) return;
   egg.found=true; egg.foundAt=new Date().toISOString();
