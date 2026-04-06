@@ -951,7 +951,7 @@ function foundByGPS() {
         var dist = getDistanceMeters(myLat, myLng, egg.lat, egg.lng);
         if(dist < nearestDist) { nearestDist = dist; nearest = egg; }
       });
-      var RADIUS_M = 30;
+      var RADIUS_M = 15;
       if(!nearest) { showToast('⚠️ No eggs with GPS found nearby.'); return; }
       if(nearestDist > RADIUS_M) {
         showToast('🔍 No egg within ' + RADIUS_M + 'm. Nearest is ' + Math.round(nearestDist) + 'm away.');
