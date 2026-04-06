@@ -489,7 +489,7 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
 ["goHider","goHunter","goSplash","confirmHunterName","pinKey","pinDel","switchAdminTab","lockLocation",
  "handlePhoto","selectColor","saveEgg","clearAllEggs","adminMarkFound","adminMarkUnfound",
  "deleteEgg","navTo","setAdminFilter","showPhoto","closeModal","switchHunterTab",
- "setHunterFilter","hunterClaim","hunterUnclaim","closeCelebration","foundByGPS"
+ "setHunterFilter","hunterClaim","hunterUnclaim","closeCelebration","foundByGPS","doGetPosition","resetGPSBtn"
 ].forEach(function(fn){
   window[fn]=function(){ var a=arguments;
     if(window["__"+fn]){ window["__"+fn].apply(null,a); }
@@ -927,16 +927,45 @@ function removeMyClaimedEgg(id) {
   try { localStorage.setItem('my-claimed-eggs', JSON.stringify(list)); } catch(e) {}
 }
 
+function resetGPSBtn() {
+  const btn = document.querySelector('.gps-claim-btn');
+  if(btn) {
+    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> I Found One!';
+    btn.disabled = false;
+  }
+}
+
 function foundByGPS() {
   if(!eggs.some(e=>!e.found)) { showToast('🎉 All eggs have been found!'); return; }
+  // Check if geolocation is supported
+  if(!navigator.geolocation) {
+    showGPSError('PERMISSION');
+    return;
+  }
   const btn = document.querySelector('.gps-claim-btn');
-  if(btn) { btn.textContent='📡 Getting location...'; btn.disabled=true; }
+  if(btn) { btn.innerHTML = '📡 Getting location...'; btn.disabled = true; }
+
+  // Use permissions API first if available (Chrome) to give better error messages
+  if(navigator.permissions && navigator.permissions.query) {
+    navigator.permissions.query({name:'geolocation'}).then(result => {
+      if(result.state === 'denied') {
+        resetGPSBtn();
+        showGPSError('DENIED');
+        return;
+      }
+      doGetPosition();
+    }).catch(() => doGetPosition());
+  } else {
+    doGetPosition();
+  }
+}
+
+function doGetPosition() {
   navigator.geolocation.getCurrentPosition(
     (pos) => {
-      if(btn) { btn.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> I Found One!'; btn.disabled=false; }
+      resetGPSBtn();
       const myLat = pos.coords.latitude;
       const myLng = pos.coords.longitude;
-      // Find nearest unfound egg
       let nearest = null, nearestDist = Infinity;
       eggs.filter(e=>!e.found && e.lat).forEach(egg=>{
         const dist = getDistanceMeters(myLat, myLng, egg.lat, egg.lng);
@@ -945,17 +974,40 @@ function foundByGPS() {
       const RADIUS_M = 30;
       if(!nearest) { showToast('⚠️ No eggs with GPS found nearby.'); return; }
       if(nearestDist > RADIUS_M) {
-        showToast(`🔍 No egg within ${RADIUS_M}m. Nearest is ${Math.round(nearestDist)}m away.`);
+        showToast('🔍 No egg within ' + RADIUS_M + 'm. Nearest is ' + Math.round(nearestDist) + 'm away.');
         return;
       }
       hunterClaim(nearest.id);
     },
-    () => {
-      if(btn) { btn.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> I Found One!'; btn.disabled=false; }
-      showToast('⚠️ GPS failed. Check your location permissions.');
+    (err) => {
+      resetGPSBtn();
+      if(err.code === 1) { showGPSError('DENIED'); }
+      else if(err.code === 3) { showGPSError('TIMEOUT'); }
+      else { showGPSError('GENERIC'); }
     },
     {enableHighAccuracy:true, timeout:15000, maximumAge:5000}
   );
+}
+
+function showGPSError(type) {
+  let msg = '';
+  if(type === 'DENIED' || type === 'PERMISSION') {
+    msg = '📍 Location blocked. In Safari: tap AA in address bar → Website Settings → Location → Allow';
+  } else if(type === 'TIMEOUT') {
+    msg = '⏱️ GPS timed out. Step outside and try again.';
+  } else {
+    msg = '⚠️ GPS unavailable. Make sure Location is enabled in your iPhone Settings → Privacy → Location Services.';
+  }
+  // Show as a longer toast
+  const t = document.getElementById('toast');
+  if(t) {
+    t.style.whiteSpace = 'normal';
+    t.style.maxWidth = '90vw';
+    t.style.textAlign = 'center';
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => { t.classList.remove('show'); t.style.whiteSpace = ''; t.style.maxWidth = ''; }, 6000);
+  }
 }
 
 function getDistanceMeters(lat1, lng1, lat2, lng2) {
@@ -986,7 +1038,7 @@ function hunterUnclaim(id) {
 }
 
 // Map popup claim
-window.__foundByGPS=foundByGPS;
+window.__foundByGPS=foundByGPS; window.__doGetPosition=doGetPosition; window.__resetGPSBtn=resetGPSBtn;
 window.claimEggFromMap = function(id) {
   const egg=eggs.find(e=>e.id===id); if(!egg||egg.found) return;
   egg.found=true; egg.foundAt=new Date().toISOString();
@@ -1072,7 +1124,7 @@ window.__setAdminFilter=setAdminFilter; window.__showPhoto=showPhoto; window.__c
 window.__switchHunterTab=switchHunterTab; window.__setHunterFilter=setHunterFilter;
 window.__hunterClaim=hunterClaim; window.__hunterUnclaim=hunterUnclaim;
 window.__closeCelebration=closeCelebration;
-window.__foundByGPS=foundByGPS;
+window.__foundByGPS=foundByGPS; window.__doGetPosition=doGetPosition; window.__resetGPSBtn=resetGPSBtn;
 window.claimEggFromMap=function(id){
   const egg=eggs.find(e=>e.id===id); if(!egg||egg.found) return;
   egg.found=true; egg.foundAt=new Date().toISOString();
