@@ -170,12 +170,12 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
 /* ── HUNTER VIEWS ── */
 .h-view{display:none;}
 .h-view.active{display:block;}
-.h-map-wrap{padding:12px 12px 0;}
+.h-map-wrap{padding:8px 12px 0;}
 .h-map-box{border-radius:20px;overflow:hidden;border:1px solid var(--border);}
-#hunter-map-frame{width:100%;height:420px;border:none;display:block;}
+#hunter-map-frame{width:100%;height:clamp(200px,38vh,380px);border:none;display:block;}
 .h-map-legend{background:var(--card);border:1px solid var(--border);border-top:none;border-radius:0 0 20px 20px;padding:10px 16px;display:flex;gap:20px;}
 .h-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--gray);}
-.h-egg-section{padding:16px 12px 120px;}
+.h-egg-section{padding:10px 12px 120px;}
 .h-section-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--gray);margin-bottom:10px;padding:0 4px;}
 .h-filter-row{display:flex;gap:8px;margin-bottom:14px;}
 .h-filter{padding:6px 14px;border-radius:100px;border:1px solid var(--border);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;color:var(--gray);cursor:pointer;-webkit-appearance:none;}
@@ -489,7 +489,7 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
 ["goHider","goHunter","goSplash","confirmHunterName","pinKey","pinDel","switchAdminTab","lockLocation",
  "handlePhoto","selectColor","saveEgg","clearAllEggs","adminMarkFound","adminMarkUnfound",
  "deleteEgg","navTo","setAdminFilter","showPhoto","closeModal","switchHunterTab",
- "setHunterFilter","hunterClaim","hunterUnclaim","closeCelebration"
+ "setHunterFilter","hunterClaim","hunterUnclaim","closeCelebration","foundByGPS"
 ].forEach(function(fn){
   window[fn]=function(){ var a=arguments;
     if(window["__"+fn]){ window["__"+fn].apply(null,a); }
@@ -651,7 +651,7 @@ function lockLocation() {
       disp.classList.add('visible'); showToast('📍 Location locked!');
     },
     () => { btn.classList.remove('loading'); text.textContent='GPS Failed – Tap to Retry'; showToast('⚠️ GPS failed.'); },
-    {enableHighAccuracy:true,timeout:12000,maximumAge:0}
+    {enableHighAccuracy:true,timeout:15000,maximumAge:5000}
   );
 }
 
@@ -954,7 +954,7 @@ function foundByGPS() {
       if(btn) { btn.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> I Found One!'; btn.disabled=false; }
       showToast('⚠️ GPS failed. Check your location permissions.');
     },
-    {enableHighAccuracy:true, timeout:10000, maximumAge:0}
+    {enableHighAccuracy:true, timeout:15000, maximumAge:5000}
   );
 }
 
