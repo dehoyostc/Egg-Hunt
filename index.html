@@ -170,9 +170,9 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
 /* ── HUNTER VIEWS ── */
 .h-view{display:none;}
 .h-view.active{display:block;}
-.h-map-wrap{padding:8px 12px 0;}
-.h-map-box{border-radius:20px;overflow:hidden;border:1px solid var(--border);}
-#hunter-map-frame{width:100%;height:clamp(200px,38vh,380px);border:none;display:block;}
+.h-map-wrap{padding:8px 12px 0;flex:1;display:flex;flex-direction:column;min-height:0;}
+.h-map-box{border-radius:20px;overflow:hidden;border:1px solid var(--border);flex:1;display:flex;flex-direction:column;min-height:0;}
+#hunter-map-frame{width:100%;height:100%;border:none;display:block;min-height:200px;}
 .h-map-legend{background:var(--card);border:1px solid var(--border);border-top:none;border-radius:0 0 20px 20px;padding:10px 16px;display:flex;gap:20px;}
 .h-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--gray);}
 .h-egg-section{padding:10px 12px 120px;}
@@ -427,18 +427,21 @@ body{font-family:'Barlow',sans-serif;background:var(--black);min-height:100vh;co
     </div>
   </div>
   <div class="h-view active" id="hview-map">
-    <div class="h-map-wrap">
-      <div class="h-map-box">
-        <iframe id="hunter-map-frame" src="about:blank"></iframe>
-        <div class="h-map-legend">
-          <div class="h-legend-item"><div class="legend-dot" style="background:#f5c842;border-radius:50%;width:10px;height:10px;"></div>Not Found</div>
-          <div class="h-legend-item"><div class="legend-dot" style="background:#888;border-radius:50%;width:10px;height:10px;"></div>Found</div>
+    <!-- Viewport-height top section: fills 100vh minus the sticky header -->
+    <div id="h-above-fold" style="height:calc(var(--vh,1vh)*100 - var(--header-h,130px));display:flex;flex-direction:column;min-height:0;">
+      <div class="h-map-wrap">
+        <div class="h-map-box">
+          <iframe id="hunter-map-frame" src="about:blank"></iframe>
+          <div class="h-map-legend">
+            <div class="h-legend-item"><div class="legend-dot" style="background:#f5c842;border-radius:50%;width:10px;height:10px;"></div>Not Found</div>
+            <div class="h-legend-item"><div class="legend-dot" style="background:#888;border-radius:50%;width:10px;height:10px;"></div>Found</div>
+          </div>
         </div>
       </div>
+      <div id="h-big-stats" style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;color:var(--white);padding:12px 16px 10px;line-height:1.1;flex-shrink:0;"></div>
     </div>
+    <!-- Egg list scrolls below -->
     <div class="h-egg-section">
-      <div id="h-big-stats" style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;color:var(--white);margin-bottom:16px;line-height:1.1;"></div>
-
       <div class="h-section-label">Eggs</div>
       <div class="h-filter-row">
         <button class="h-filter active" data-filter="all" onclick="setHunterFilter(this)">All</button>
@@ -859,6 +862,7 @@ function renderHunterAll() {
   renderHunterMap();
   renderHunterGrid();
   renderLeaderboard('leaderboard-list');
+  if(window.setViewportVars) setTimeout(window.setViewportVars, 50);
 }
 
 function updateHunterStats() {
@@ -1031,6 +1035,7 @@ function hunterUnclaim(id) {
 
 // Map popup claim
 window.__foundByGPS=foundByGPS; window.__resetGPSBtn=resetGPSBtn;
+  window.setViewportVars=setViewportVars;
 window.claimEggFromMap = function(id) {
   const egg=eggs.find(e=>e.id===id); if(!egg||egg.found) return;
   egg.found=true; egg.foundAt=new Date().toISOString();
@@ -1117,6 +1122,7 @@ window.__switchHunterTab=switchHunterTab; window.__setHunterFilter=setHunterFilt
 window.__hunterClaim=hunterClaim; window.__hunterUnclaim=hunterUnclaim;
 window.__closeCelebration=closeCelebration;
 window.__foundByGPS=foundByGPS; window.__resetGPSBtn=resetGPSBtn;
+  window.setViewportVars=setViewportVars;
 window.claimEggFromMap=function(id){
   const egg=eggs.find(e=>e.id===id); if(!egg||egg.found) return;
   egg.found=true; egg.foundAt=new Date().toISOString();
@@ -1126,6 +1132,16 @@ window.claimEggFromMap=function(id){
 };
 
 // ── INIT ──
+  function setViewportVars() {
+    // Real viewport height (accounts for browser chrome on mobile)
+    var vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', vh + 'px');
+    // Header height
+    var hdr = document.querySelector('#hunter-wrap .app-header');
+    if(hdr) document.documentElement.style.setProperty('--header-h', hdr.offsetHeight + 'px');
+  }
+  setViewportVars();
+  window.addEventListener('resize', setViewportVars);
   startSync();
 </script>
 </body>
